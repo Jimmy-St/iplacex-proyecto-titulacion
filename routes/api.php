@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 
 // API Controller demo
 use App\Http\Controllers\ItemController;
+use App\Http\Controllers\TicketController;
+
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -27,3 +29,8 @@ Route::get('/prueba-items', function () {
 
 // API Router demo
 Route::apiResource('items', ItemController::class);
+
+// API Router Ticket
+Route::post('/tickets', [TicketController::class, 'store']);
+Route::put('/tickets/{ticket_number}', [TicketController::class, 'update']);
+Route::get('/tickets/{ticket_number}', [TicketController::class, 'show']);
