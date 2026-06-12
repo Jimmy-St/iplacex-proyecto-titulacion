@@ -9,34 +9,19 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Throwable;
 
+use App\Http\Requests\TicketRequest;
+
 class TicketController extends Controller
 {
     /**
      * Almacena un nuevo ticket junto con sus ítems.
      * Este es el endpoint que consumirá la extensión de Chrome.
      */
-    public function store(Request $request)
+    public function store(TicketRequest $request)
     {
-        // 1. Validamos que los datos que envía la extensión tengan el formato correcto.
-        $validator = Validator::make($request->all(), [
-            'ticket_number'        => 'required|string|unique:tickets,ticket_number',
-            'seller_employee_code' => 'required|string|exists:sellers,employee_code',
-            'total_amount'         => 'required|numeric',
-            'issued_at'            => 'required|date',
-            'items'                => 'required|array|min:1',
-            'items.*.product_code' => 'required|string',
-            'items.*.product_name' => 'required|string',
-            'items.*.quantity'     => 'required|integer|min:1',
-            'items.*.price'        => 'required|numeric',
-            'items.*.subtotal'     => 'required|numeric',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
+        // 1. Validamos datos de la extensión en archivo externo en StoreTicketRequest.php
 
         // 2. Usamos una transacción para garantizar la integridad de los datos.
-        // O se guarda todo (ticket + items) o no se guarda nada.
         try {
             DB::beginTransaction();
 
@@ -51,8 +36,7 @@ class TicketController extends Controller
                 'issued_at'     => $request->input('issued_at'),
             ]);
 
-            // 4. Creamos todos los ítems asociados a ese ticket de una sola vez.
-            // Es mucho más eficiente que crear uno por uno en un bucle.
+            // 4. Creamos todos los ítems asociados a ese ticket
             $ticket->items()->createMany($request->input('items'));
 
             // Si todo ha ido bien, confirmamos los cambios en la base de datos.
@@ -79,7 +63,7 @@ class TicketController extends Controller
      * Almacena un ticket actualizado junto con sus ítems.
      * Este es el endpoint que consumirá la extensión de Chrome.
      */
-    public function update(Request $request, $ticket_number)
+    public function update(TicketRequest $request, $ticket_number)
     {
         // 1. Buscamos el ticket por su número de negocio en lugar del ID
         $ticket = Ticket::where('ticket_number', $ticket_number)->first();
