@@ -3,31 +3,41 @@
 namespace Database\Factories;
 
 use App\Models\Ticket;
-use App\Models\Seller;
+use App\Models\TicketItem; // Asegúrate de importar el modelo de tus ítems
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Ticket>
- */
 class TicketFactory extends Factory
 {
-    /**
-     * El nombre del modelo correspondiente a esta factory.
-     */
-    protected $model = Ticket::class;
-
-    /**
-     * Define el estado por defecto del modelo.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
+        $fechaSimulada = $this->faker->dateTimeBetween('-1 year', 'now');
+
         return [
-            'ticket_number' => $this->faker->unique()->numerify('TCK-########'),
-            'seller_id'     => Seller::inRandomOrder()->value('id') ?? Seller::factory(),
-            'total_amount'  => $this->faker->randomFloat(2, 50, 5000), // Monto entre 50.00 y 5000.00
-            'issued_at'     => $this->faker->dateTimeBetween('-1 year', 'now'), // Fecha del último año
+            'ticket_number' => 'TKT-' . $this->faker->unique()->numberBetween(100000, 999999),
+            'seller_id'     => $this->faker->optional(0.7)->numberBetween(1, 10),
+            'seller'        => $this->faker->name(),
+            'total_amount'  => $this->faker->randomFloat(2, 1000, 50000),
+            'status'        => $this->faker->randomElement(['PAGADO', 'COMPLETADO', 'PENDIENTE']),
+            'created_at'    => $fechaSimulada,
+            'updated_at'    => $fechaSimulada,
         ];
+    }
+
+    /**
+     * Acciones que ocurren justo después de crear el Ticket
+     */
+    public function configure()
+    {
+        return $this->afterCreating(function (\App\Models\Ticket $ticket) {
+            $cantidadItems = rand(2, 6);
+
+            \App\Models\TicketItem::factory()
+                ->count($cantidadItems)
+                ->create([
+                    'ticket_id'  => $ticket->id,
+                    'created_at' => $ticket->created_at, // Vital: clonamos el tiempo histórico del padre
+                    'updated_at' => $ticket->created_at,
+                ]);
+        });
     }
 }

@@ -10,17 +10,20 @@ use Throwable;
 
 use App\Http\Requests\TicketRequest;
 
-class TicketController extends Controller
+class TicketsController extends Controller
 {
-
     public function index()
     {
-        // Obtenemos los datos normalmente
-        $tickets = Ticket::with(['seller', 'items'])->latest()->get();
+        $fecha  = request('fecha', date('Y-m-d'));
+        $buscar = request('buscar');
 
-        // Retornamos la vista (por ejemplo, resources/views/tickets/index.blade.php)
-        // pasando la variable 'tickets'
-        return view('tickets.index', compact('tickets'));
+        $tickets = Ticket::with(['seller', 'items'])
+            ->whereDate('issued_at', $fecha)
+            ->when($buscar, fn($q) => $q->where('ticket_number', 'LIKE', "%{$buscar}%"))
+            ->latest()
+            ->get();
+
+        return view('tickets.index', compact('tickets', 'fecha'));
     }
 
     public function show($numero)
@@ -32,18 +35,15 @@ class TicketController extends Controller
 
     /**
      * Almacena un nuevo ticket junto con sus ítems.
-     * Este es el endpoint que consumirá la extensión de Chrome.
+     * Endpoint consumido por la extensión de Chrome.
      */
     public function store(TicketRequest $request)
     {
-        // Usamos una transacción para garantizar la integridad de los datos.
         try {
             DB::beginTransaction();
 
-            // Buscamos al vendedor por su código, que es más robusto que un ID.
             $seller = Seller::where('employee_code', $request->input('seller_employee_code'))->firstOrFail();
 
-            // 3. Creamos el Ticket principal.
             $ticket = Ticket::create([
                 'ticket_number' => $request->input('ticket_number'),
                 'seller_id'     => $seller->id,
@@ -51,13 +51,10 @@ class TicketController extends Controller
                 'issued_at'     => $request->input('issued_at'),
             ]);
 
-            // Creamos todos los ítems asociados a ese ticket
             $ticket->items()->createMany($request->input('items'));
 
-            // Si todo ha ido bien, confirmamos los cambios en la base de datos.
             DB::commit();
 
-            // almacenar en log
             Log::info('Ticket creado con éxito', [
                 'ticket_number' => $request->input('ticket_number'),
                 'seller_code'   => $request->input('seller_employee_code'),
@@ -66,15 +63,12 @@ class TicketController extends Controller
             ]);
 
             return response()->json([
-                'message' => 'Ticket y sus ítems creados con éxito.',
+                'message'   => 'Ticket y sus ítems creados con éxito.',
                 'ticket_id' => $ticket->id,
-            ], 201); // 201: Created
-
+            ], 201);
         } catch (Throwable $e) {
-            // Si algo falla, revertimos todos los cambios.
             DB::rollBack();
 
-            // almacenar en log
             Log::error('Error al crear Ticket', [
                 'ticket_number' => $request->input('ticket_number'),
                 'error'         => $e->getMessage(),
@@ -82,53 +76,42 @@ class TicketController extends Controller
                 'trace'         => $e->getTraceAsString()
             ]);
 
-            // Y devolvemos un error para que se pueda depurar.
             return response()->json([
                 'message' => 'Error al crear el ticket.',
-                'error' => $e->getMessage()
-            ], 500); // 500: Internal Server Error
+                'error'   => $e->getMessage()
+            ], 500);
         }
     }
 
     /**
-     * Almacena un ticket actualizado junto con sus ítems.
-     * Este es el endpoint que consumirá la extensión de Chrome.
+     * Actualiza un ticket existente junto con sus ítems.
+     * Endpoint consumido por la extensión de Chrome.
      */
     public function update(TicketRequest $request, $ticket_number)
     {
-        // 1. Buscamos el ticket por su número interno
         $ticket = Ticket::where('ticket_number', $ticket_number)->first();
 
         if (!$ticket) {
             return response()->json(['message' => 'Ticket no encontrado.'], 404);
         }
 
-        // Guardamos el ID interno
-        $ticketId = $ticket->id;
-
-        // Proceso de actualización con Transacción
         try {
             DB::beginTransaction();
 
             $seller = Seller::where('employee_code', $request->input('seller_employee_code'))->firstOrFail();
 
-            // Actualizamos la cabecera
             $ticket->update([
-                'ticket_number' => $request->input('ticket_number'), // Por si la extensión decide corregir el número
+                'ticket_number' => $request->input('ticket_number'),
                 'seller_id'     => $seller->id,
                 'total_amount'  => $request->input('total_amount'),
                 'issued_at'     => $request->input('issued_at'),
             ]);
 
-            // Drop: Eliminamos los ítems viejos asociados
             $ticket->items()->delete();
-
-            // Recreate: Insertamos los nuevos ítems en lote
             $ticket->items()->createMany($request->input('items'));
 
             DB::commit();
 
-            // almacenar en log
             Log::info('Ticket editado con éxito', [
                 'ticket_number' => $request->input('ticket_number'),
                 'seller_code'   => $request->input('seller_employee_code'),
@@ -137,13 +120,12 @@ class TicketController extends Controller
             ]);
 
             return response()->json([
-                'message' => 'Ticket e ítems actualizados con éxito (recreación por número de ticket).',
+                'message'   => 'Ticket e ítems actualizados con éxito.',
                 'ticket_id' => $ticket->id
             ], 200);
         } catch (Throwable $e) {
             DB::rollBack();
 
-            // almacenar en log
             Log::error('Error al editar Ticket', [
                 'ticket_number' => $request->input('ticket_number'),
                 'error'         => $e->getMessage(),
@@ -153,7 +135,7 @@ class TicketController extends Controller
 
             return response()->json([
                 'message' => 'Error al actualizar el ticket.',
-                'error' => $e->getMessage()
+                'error'   => $e->getMessage()
             ], 500);
         }
     }

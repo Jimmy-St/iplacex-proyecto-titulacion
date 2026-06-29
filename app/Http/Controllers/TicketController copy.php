@@ -12,22 +12,26 @@ use App\Http\Requests\TicketRequest;
 
 class TicketController extends Controller
 {
-
+    // public function __construct()
+    // {
+    //     if (!session()->has('auth')) {
+    //         //return redirect('/')->send();
+    //     }
+    // }
+    /**
+     * Mostrar Listado
+     * 
+     */
     public function index()
     {
-        // Obtenemos los datos normalmente
+        // Usamos all() o get() para traer absolutamente todo. 
+        //latest() asegura que los más nuevos salgan primero.
         $tickets = Ticket::with(['seller', 'items'])->latest()->get();
 
-        // Retornamos la vista (por ejemplo, resources/views/tickets/index.blade.php)
-        // pasando la variable 'tickets'
-        return view('tickets.index', compact('tickets'));
-    }
-
-    public function show($numero)
-    {
-        $ticket = Ticket::with('items')->where('ticket_number', $numero)->firstOrFail();
-
-        return view('tickets.show', compact('ticket'));
+        return response()->json([
+            'message' => 'Listado completo de tickets recuperado.',
+            'data'    => $tickets
+        ], 200);
     }
 
     /**
@@ -156,5 +160,28 @@ class TicketController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Busca y muestra un ticket junto con sus ítems.
+     * Este es el endpoint que consumirá la extensión de Chrome.
+     */
+    public function show($ticket_number)
+    {
+        // Buscamos el ticket por su número cargando inmediatamente sus ítems relacionados
+        $ticket = Ticket::with('items')->where('ticket_number', $ticket_number)->first();
+
+        // Si el ticket no existe, devolvemos un 404
+        if (!$ticket) {
+            return response()->json([
+                'message' => "El ticket número $ticket_number no existe en los registros."
+            ], 404);
+        }
+
+        // Retornamos el ticket con todos sus datos e ítems
+        return response()->json([
+            'message' => 'Ticket recuperado con éxito.',
+            'data'    => $ticket
+        ], 200);
     }
 }

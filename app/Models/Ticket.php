@@ -4,8 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Ticket extends Model
 {
@@ -14,24 +12,10 @@ class Ticket extends Model
     protected $fillable = [
         'ticket_number',
         'seller_id',
+        'seller',
         'total_amount',
-        'issued_at',
+        'status',
+        'created_at',
+        'updated_at',
     ];
-
-    /**
-     * Obtener los ítems asociados a este ticket.
-     */
-    public function items(): HasMany
-    {
-        // Le indicamos que se conecta con TicketItem usando la llave foránea 'ticket_id'
-        return $this->hasMany(TicketItem::class, 'ticket_id');
-    }
-
-    /**
-     * Obtener el vendedor que emitió este ticket.
-     */
-    public function seller(): BelongsTo
-    {
-        return $this->belongsTo(Seller::class);
-    }
 }

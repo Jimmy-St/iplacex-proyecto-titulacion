@@ -1,0 +1,16 @@
+[
+    {
+        "id": 1,
+        "name": "Picker 01",
+        "employee_code": "PK-001",
+        "status": "Activo",
+        "tickets_today": 15
+    },
+    {
+        "id": 2,
+        "name": "Picker 02",
+        "employee_code": "PK-002",
+        "status": "Inactivo",
+        "tickets_today": 0
+    }
+]

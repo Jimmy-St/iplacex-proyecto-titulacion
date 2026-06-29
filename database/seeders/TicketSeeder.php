@@ -12,6 +12,8 @@ class TicketSeeder extends Seeder
      */
     public function run(): void
     {
-        Ticket::factory()->count(30)->create();
+        // Generamos 50 tickets. Cada uno creará automáticamente entre 2 y 6 ítems 
+        // con consistencia matemática y la misma fecha gracias al Factory.
+        Ticket::factory()->count(250)->create();
     }
 }

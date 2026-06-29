@@ -2,34 +2,22 @@
 
 namespace Database\Factories;
 
-use App\Models\TicketItem;
-use App\Models\Ticket;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\TicketItem>
- */
 class TicketItemFactory extends Factory
 {
-    /**
-     * El nombre del modelo correspondiente a esta factory.
-     */
-    protected $model = TicketItem::class;
-
-    /**
-     * Define el estado por defecto del modelo.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
+        $quantity = $this->faker->numberBetween(1, 10);
+        $price = $this->faker->randomFloat(2, 500, 15000); // Precios realistas en CLP/Decimal
+
         return [
-            'ticket_id'    => Ticket::inRandomOrder()->value('id') ?? Ticket::factory(),
-            'product_code' => $this->faker->bothify('PRD-####'),
+            // 'ticket_id' lo inyectará dinámicamente el padre en el afterCreating
+            'product_code' => 'PROD-' . $this->faker->unique()->numberBetween(1000, 9990),
             'product_name' => $this->faker->words(3, true),
-            'quantity'     => $quantity = $this->faker->numberBetween(1, 10),
-            'price'        => $price = $this->faker->randomFloat(2, 5, 500),
-            'subtotal'     => $quantity * $price,
+            'quantity'     => $quantity,
+            'price'        => $price,
+            'subtotal'     => $quantity * $price, // <--- Matemática exacta para la consistencia
         ];
     }
 }
