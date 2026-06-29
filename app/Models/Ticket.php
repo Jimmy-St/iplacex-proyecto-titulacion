@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Ticket extends Model
 {
@@ -16,6 +17,14 @@ class Ticket extends Model
         'total_amount',
         'status',
         'created_at',
-        'updated_at',
+        'updated_at'
     ];
+
+    /**
+     * Relación: Un Ticket tiene muchos Ítems
+     */
+    public function items(): HasMany
+    {
+        return $this->hasMany(TicketItem::class, 'ticket_id');
+    }
 }

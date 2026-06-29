@@ -2,53 +2,286 @@
 
 @section('content')
 
-  <div class="mb-6 flex items-center gap-3">
-    <a href="{{ route('tickets.index') }}"
-       class="flex items-center gap-1.5 text-white/35 hover:text-white/70 text-sm transition-colors">
-      <i data-lucide="arrow-left" class="w-4 h-4" style="stroke-width:1.5"></i>
-      Volver
-    </a>
-    <span class="text-white/15">/</span>
-    <span class="text-white/55 text-sm">Ticket #{{ $ticket->ticket_number }}</span>
-  </div>
-
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-
-    <div class="bg-gray-900 border border-white/[0.06] rounded-xl px-5 py-4">
-      <p class="text-[11px] text-white/35 uppercase tracking-widest mb-1">Ticket</p>
-      <p class="text-lg font-semibold text-white">#{{ $ticket->ticket_number }}</p>
-    </div>
-
-    <div class="bg-gray-900 border border-white/[0.06] rounded-xl px-5 py-4">
-      <p class="text-[11px] text-white/35 uppercase tracking-widest mb-1">Picker</p>
-      <p class="text-lg font-semibold text-white">{{ $ticket->seller->name ?? '—' }}</p>
-    </div>
-
-    <div class="bg-gray-900 border border-white/[0.06] rounded-xl px-5 py-4">
-      <p class="text-[11px] text-white/35 uppercase tracking-widest mb-1">Total</p>
-      <p class="text-lg font-semibold text-white">${{ number_format($ticket->total_amount, 0, ',', '.') }}</p>
-    </div>
-
-  </div>
-
-  <div class="hidden md:grid md:grid-cols-4 px-4 py-2.5
-              text-[11px] font-semibold text-white/30 uppercase tracking-widest
-              border-b border-white/[0.07]">
-    <div class="col-span-2">Producto</div>
-    <div class="text-center">Cantidad</div>
-    <div class="text-right">Precio</div>
-  </div>
-
-  <div class="divide-y divide-white/[0.05]">
-    @forelse($ticket->items as $item)
-      <div class="grid grid-cols-2 md:grid-cols-4 items-center px-4 py-3.5 hover:bg-slate-800/20 transition-colors">
-        <div class="col-span-2 text-sm text-white">{{ $item->description ?? $item->name ?? '—' }}</div>
-        <div class="hidden md:block text-sm text-white/55 text-center">{{ $item->quantity }}</div>
-        <div class="text-sm text-white/55 text-right">${{ number_format($item->price, 0, ',', '.') }}</div>
+  {{-- ========================================================================= --}}
+  {{-- CAJA DE ICONOS OCULTOS: Lucide los renderiza aquí en el arranque inicial   --}}
+  {{-- ========================================================================= --}}
+  <div class="hidden">
+      <div id="icono-eliminar">
+          <i data-lucide="x" class="w-3.5 h-3.5" style="stroke-width:1.8"></i>
       </div>
-    @empty
-      <div class="px-4 py-8 text-center text-white/25 text-sm">Sin ítems registrados</div>
-    @endforelse
   </div>
+
+  @if($ticket)
+    {{-- ========================================================================= --}}
+    {{-- VISTA DETALLE: Se renderiza si el Ticket SÍ existe                         --}}
+    {{-- ========================================================================= --}}
+    
+    {{-- Contenedor Maestro Interactivo con Alpine.js --}}
+    <div x-data="{ 
+        status: '{{ $ticket->status ?? 'PENDIENTE' }}',
+        showStatusDropdown: false,
+        showPickerModal: false,
+        availablePickers: [
+            { id: 1, name: 'Juan Pérez' },
+            { id: 2, name: 'María Inés' },
+            { id: 3, name: 'Carlos Soto' },
+            { id: 4, name: 'Ana Luz' },
+            { id: 5, name: 'Diego Silva' },
+            { id: 6, name: 'Laura Rodríguez' },
+            { id: 7, name: 'Pedro Gómez' },
+            { id: 8, name: 'Sofía García' },
+            { id: 9, name: 'Daniel Garrido' }
+        ],
+        assignedPickers: [],
+        
+        addPicker(picker) {
+            if (this.assignedPickers.length < 5 && !this.assignedPickers.find(p => p.id === picker.id)) {
+                this.assignedPickers.push(picker);
+            }
+        },
+        removePicker(id) {
+            this.assignedPickers = this.assignedPickers.filter(p => p.id !== id);
+        }
+    }" class="relative">
+
+        {{-- Botón Volver --}}
+        <div class="mb-6 flex items-center gap-3">
+          <a href="{{ route('tickets.index') }}"
+             class="flex items-center gap-1.5 text-white/35 hover:text-white/70 text-sm transition-colors">
+            <i data-lucide="arrow-left" class="w-4 h-4" style="stroke-width:1.5"></i>
+            Volver
+          </a>
+          <span class="text-white/15">/</span>
+          <span class="text-white/55 text-sm">Ticket #{{ $ticket->ticket_number }}</span>
+        </div>
+
+        {{-- LAYOUT SUPERIOR REESTRUCTURADO (2 Secciones en lugar de 3) --}}
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
+            
+            {{-- SECCIÓN 1: DATOS DEL TICKET (Ocupa 2 columnas en Desk) --}}
+            <div class="lg:col-span-2 bg-gray-900 border border-white/[0.06] rounded-xl p-5 flex flex-col justify-between gap-y-5">
+                <div class="flex flex-wrap justify-between items-start gap-4">
+                    {{-- Bloque Izquierdo: Documento, ID y Badge Tributario --}}
+                    <div class="flex items-start gap-4">
+                        <div>
+                            <p class="text-[11px] text-white/35 uppercase tracking-widest mb-1">Documento de Venta</p>
+                            <h1 class="text-xl font-semibold text-white tracking-tight inline-flex items-center gap-3">
+                                #{{ $ticket->ticket_number }}
+                            </h1>
+                        </div>
+
+                        {{-- BADGE TRIBUTARIO: Ubicado arriba en el espacio vacío con icono más grande --}}
+                        {{-- <div class="flex items-center gap-2 bg-white/[0.02] border border-white/[0.06] rounded-xl px-3 py-3 mt-1">
+                            <i data-lucide="file-text" class="w-5 h-5 text-purple-400" style="stroke-width:1.5"></i>
+                            <div class="leading-none">
+                                <span class="text-s font-medium text-white/50 inline">{{ $ticket->document_type ?? 'Factura: ' }}</span>
+                                <span class="text-s text-white/80 font-mono inline mt-1">#{{ $ticket->document_number ?? '3456764' }}</span>
+                            </div>
+                        </div> --}}
+
+                        {{-- BADGE ESTADO DE PAGO: Al lado del documento, notorio pero elegante --}}
+                        {{-- <div class="mt-1">
+                            Opción 1: Pagado
+                            <div class="flex items-center gap-2 bg-emerald-500/5 border border-emerald-500/20 rounded-xl px-3 py-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                                <span class="text-s font-medium text-emerald-400">Pagado</span>
+                            </div>
+
+                            Opción 2: No Pagado
+                            
+                            <div class="flex items-center gap-2 bg-rose-500/5 border border-rose-500/20 rounded-xl px-3 py-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+                                <span class="text-s font-medium text-rose-400">No Pagado</span>
+                            </div> 
+                           
+                        </div> --}}
+                    </div>
+                    
+                    {{-- Dropdown de Estados con el ancho fijo original --}}
+                    <div class="relative">
+                        <button @click="showStatusDropdown = !showStatusDropdown" 
+                                @click.away="showStatusDropdown = false"
+                                class="flex items-center justify-between w-36 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors"
+                                :class="{
+                                    'bg-amber-500/10 border-amber-500/30 text-amber-400': status === 'PENDIENTE',
+                                    'bg-blue-500/10 border-blue-500/30 text-blue-400': status === 'PREPARANDO',
+                                    'bg-emerald-500/10 border-emerald-500/30 text-emerald-400': status === 'COMPLETADO'
+                                }">
+                            <div class="flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full"
+                                      :class="{
+                                          'bg-amber-400 animate-pulse': status === 'PENDIENTE',
+                                          'bg-blue-400 animate-pulse': status === 'PREPARANDO',
+                                          'bg-emerald-400': status === 'COMPLETADO'
+                                      }"></span>
+                                <span x-text="status"></span>
+                            </div>
+                            <i data-lucide="chevron-down" class="w-3.5 h-3.5 opacity-60" style="stroke-width:2"></i>
+                        </button>
+
+                        <div x-show="showStatusDropdown" 
+                             x-transition:enter="transition ease-out duration-100"
+                             x-transition:enter-start="transform opacity-0 scale-95"
+                             x-transition:enter-end="transform opacity-100 scale-100"
+                             class="absolute right-0 mt-2 w-36 rounded-xl bg-zinc-950 border border-white/[0.08] shadow-2xl p-1 z-50"
+                             style="display: none;">
+                            <button @click="status = 'PENDIENTE'; showStatusDropdown = false" class="w-full text-left px-3 py-2 rounded-lg text-xs text-amber-400 hover:bg-white/[0.03] transition-colors">Pendiente</button>
+                            <button @click="status = 'PREPARANDO'; showStatusDropdown = false" class="w-full text-left px-3 py-2 rounded-lg text-xs text-blue-400 hover:bg-white/[0.03] transition-colors">Preparando</button>
+                            <button @click="status = 'COMPLETADO'; showStatusDropdown = false" class="w-full text-left px-3 py-2 rounded-lg text-xs text-emerald-400 hover:bg-white/[0.03] transition-colors">Completado</button>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- DETALLES INFERIORES: Restaurado al diseño limpio original de dos columnas extremas --}}
+                <div class="flex items-center justify-between pt-3 border-t border-white/[0.04]">
+                    <div class="flex items-center gap-8">
+                        <div>
+                            <p class="text-[10px] text-white/35 uppercase tracking-widest mb-0.5">Monto Total</p>
+                            <p class="text-base font-semibold text-white/90">${{ number_format($ticket->total_amount, 0, ',', '.') }}</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-white/35 uppercase tracking-widest mb-0.5">Vendedor</p>
+                            <p class="text-sm text-white/70 max-w-[150px] truncate">{{ $ticket->seller ?? '—' }}</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-white/35 uppercase tracking-widest mb-0.5">Canal de Origen</p>
+                            <p class="text-sm text-white/70">Venta Digital</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[10px] text-white/35 uppercase tracking-widest mb-0.5">Actualizado</p>
+                        <p class="text-sm text-white/55 font-mono">{{ $ticket->updated_at ? $ticket->updated_at->format('d-m-Y H:i') : '—' }}</p>
+                    </div>
+                </div>
+            </div>
+
+            {{-- SECCIÓN 2: ASIGNACIÓN DE PICKERS EN APP STYLE --}}
+            <div class="bg-gray-900 border border-white/[0.06] rounded-xl p-5 flex flex-col justify-between min-h-[140px]">
+                <div class="flex justify-between items-start mb-2">
+                    <div>
+                        <p class="text-[11px] text-white/35 uppercase tracking-widest mb-1">Pickers Asignados</p>
+                        <p class="text-xs font-medium text-white/80" x-text="assignedPickers.length + ' / 5 Operadores'"></p>
+                    </div>
+                    
+                    <button @click="showPickerModal = true" 
+                            class="p-2 rounded-xl border transition-all flex items-center justify-center"
+                            :class="assignedPickers.length === 0 ? 'bg-white/[0.02] border-white/[0.06] text-white/20' : 'bg-purple-500/10 border-purple-500/30 text-purple-400'">
+                        <i data-lucide="user" x-show="assignedPickers.length === 0" class="w-5 h-5" style="stroke-width:1.5"></i>
+                        <i data-lucide="user-check" x-show="assignedPickers.length === 1" class="w-5 h-5" style="stroke-width:1.5" style="display: none;"></i>
+                        <i data-lucide="users" x-show="assignedPickers.length > 1" class="w-5 h-5" style="stroke-width:1.5" style="display: none;"></i>
+                    </button>
+                </div>
+
+                <div class="flex flex-wrap gap-1.5 mt-2">
+                    <template x-if="assignedPickers.length === 0">
+                        <span class="text-xs text-white/25 italic py-1">Sin personal asignado</span>
+                    </template>
+                    <template x-for="p in assignedPickers" :key="p.id">
+                        <span class="inline-flex items-center gap-1.5 bg-white/[0.04] border border-white/[0.06] rounded-lg pl-2 pr-1 py-0.5 text-[11px] text-white/70">
+                            <span x-text="p.name"></span>
+                            <button @click="removePicker(p.id)" class="text-white/30 hover:text-white/80 p-0.5 transition-colors flex items-center justify-center">
+                                <span x-html="document.getElementById('icono-eliminar').innerHTML"></span>
+                            </button>
+                        </span>
+                    </template>
+                </div>
+            </div>
+
+        </div>
+
+        {{-- MODAL INTERACTIVO RESPONSIVO PARA ASIGNAR PICKERS --}}
+        <div x-show="showPickerModal" class="fixed inset-0 z-50 flex justify-end" style="display: none;" role="dialog" aria-modal="true">
+            <div x-show="showPickerModal" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200" class="fixed inset-0 bg-black/60 backdrop-blur-sm" @click="showPickerModal = false"></div>
+            <div x-show="showPickerModal" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transition ease-in duration-200 transform" class="relative w-full max-w-md h-full bg-zinc-950 border-l border-white/[0.08] shadow-2xl flex flex-col text-white z-50 pb-20 md:pb-0">
+                
+                <div class="p-4 border-b border-white/[0.06] flex items-center justify-between">
+                    <div>
+                        <h3 class="text-sm font-semibold">Asignación de Personal</h3>
+                        <p class="text-[11px] text-white/40 mt-0.5" x-text="assignedPickers.length + ' de 5 seleccionados'"></p>
+                    </div>
+                    <button @click="showPickerModal = false" class="p-1 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/[0.04]"><i data-lucide="x" class="w-5 h-5"></i></button>
+                </div>
+
+                <div class="flex-1 overflow-y-auto p-4 flex flex-col md:flex-row gap-4">
+                    <div class="flex-1">
+                        <p class="text-[10px] text-white/35 uppercase tracking-widest font-semibold mb-2">Disponibles</p>
+                        <div class="space-y-1.5">
+                            <template x-for="picker in availablePickers" :key="picker.id">
+                                <button @click="addPicker(picker)" class="w-full flex items-center justify-between text-left p-2.5 rounded-xl border text-xs transition-all" :class="assignedPickers.find(p => p.id === picker.id) ? 'bg-zinc-900 border-white/[0.02] text-white/20 cursor-not-allowed' : 'bg-white/[0.02] border-white/[0.05] hover:border-white/[0.15] text-white/80 hover:bg-white/[0.04]'">
+                                    <span x-text="picker.name"></span>
+                                    <i data-lucide="plus" class="w-3.5 h-3.5" x-show="!assignedPickers.find(p => p.id === picker.id)"></i>
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+                    
+                    <div class="w-full md:w-44 bg-white/[0.01] border border-white/[0.04] rounded-xl p-3 flex flex-col">
+                        <p class="text-[10px] text-white/35 uppercase tracking-widest font-semibold mb-2">Selección</p>
+                        <div class="flex-1 space-y-1.5">
+                            <template x-for="p in assignedPickers" :key="p.id">
+                                <div class="flex items-center justify-between bg-purple-500/10 border border-purple-500/20 text-purple-300 rounded-lg p-2 text-xs">
+                                    <span class="truncate pr-1" x-text="p.name"></span>
+                                    <button @click="removePicker(p.id)" class="text-purple-400 hover:text-white transition-colors p-0.5 flex items-center justify-center">
+                                        <span x-html="document.getElementById('icono-eliminar').innerHTML"></span>
+                                    </button>
+                                </div>
+                            </template>
+                            <template x-if="assignedPickers.length === 0">
+                                <p class="text-[11px] text-white/20 italic text-center py-4">Ninguno</p>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 border-t border-white/[0.06] bg-zinc-900/40">
+                    <button @click="showPickerModal = false" class="w-full bg-white text-zinc-950 font-medium py-2.5 rounded-xl text-xs hover:bg-white/90 transition-colors shadow-lg">Confirmar Selección</button>
+                </div>
+            </div>
+        </div>
+
+    </div> {{-- Cierre de x-data --}}
+
+    {{-- GRILA DE PRODUCTOS ORIGINAL --}}
+    <div class="hidden md:grid md:grid-cols-4 px-4 py-2.5
+                text-[11px] font-semibold text-white/30 uppercase tracking-widest
+                border-b border-white/[0.07] mt-4">
+      <div class="col-span-2">Producto</div>
+      <div class="text-center">Cantidad</div>
+      <div class="text-right">Precio</div>
+    </div>
+
+    <div class="divide-y divide-white/[0.05]">
+      @forelse($ticket->items as $item)
+        <div class="grid grid-cols-2 md:grid-cols-4 items-center px-4 py-3.5 hover:bg-slate-800/20 transition-colors">
+          <div class="col-span-2 text-sm text-white">{{ $item->product_name ?? '—' }}</div>
+          <div class="hidden md:block text-sm text-white/55 text-center">{{ $item->quantity }}</div>
+          <div class="text-sm text-white/55 text-right">${{ number_format($item->price, 0, ',', '.') }}</div>
+        </div>
+      @empty
+        <div class="px-4 py-8 text-center text-white/25 text-sm">Sin ítems registrados</div>
+      @endforelse
+    </div>
+
+  @else
+    {{-- ========================================================================= --}}
+    {{-- VISTA ERROR CONTROLADO: Se renderiza si el Ticket NO existe                --}}
+    {{-- ========================================================================= --}}
+    <div class="mb-6 flex items-center gap-3">
+      <a href="{{ route('tickets.index') }}"
+         class="flex items-center gap-1.5 text-white/35 hover:text-white/70 text-sm transition-colors">
+        <i data-lucide="arrow-left" class="w-4 h-4" style="stroke-width:1.5"></i>
+        Volver al listado
+      </a>
+    </div>
+
+    <div class="flex flex-col items-center justify-center min-h-[45vh] text-center border border-dashed border-white/[0.06] rounded-xl p-8 bg-gray-900/20">
+      <i data-lucide="frown" class="w-12 h-12 text-white/20 mb-4" style="stroke-width:1.2"></i>
+      
+      <h2 class="text-base font-medium text-white/80">Ticket no existe</h2>
+      <p class="text-white/35 max-w-xs mt-1.5 text-xs leading-relaxed">
+        El documento número <span class="text-white/60 font-mono bg-white/[0.04] px-1.5 py-0.5 rounded border border-white/[0.05]">{{ request()->route('numero') }}</span> no figura en los registros del sistema.
+      </p>
+    </div>
+  @endif
 
 @endsection

@@ -17,8 +17,8 @@ class TicketsController extends Controller
         $fecha  = request('fecha', date('Y-m-d'));
         $buscar = request('buscar');
 
-        $tickets = Ticket::with(['seller', 'items'])
-            ->whereDate('issued_at', $fecha)
+        $tickets = Ticket::with(['items'])
+            ->whereDate('created_at', $fecha)
             ->when($buscar, fn($q) => $q->where('ticket_number', 'LIKE', "%{$buscar}%"))
             ->latest()
             ->get();
@@ -28,7 +28,8 @@ class TicketsController extends Controller
 
     public function show($numero)
     {
-        $ticket = Ticket::with('items')->where('ticket_number', $numero)->firstOrFail();
+        // $ticket = Ticket::with('items')->where('ticket_number', $numero)->firstOrFail();
+        $ticket = Ticket::with('items')->where('ticket_number', $numero)->first();
 
         return view('tickets.show', compact('ticket'));
     }
