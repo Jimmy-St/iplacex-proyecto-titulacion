@@ -22,7 +22,7 @@ class AuthController extends Controller
 
             $user = User::firstOrCreate(
                 ['email' => 'admin@pfau.cl'],
-                ['name' => 'Admin', 'password' => bcrypt('123456')]
+                ['name' => 'Admin', 'password' => bcrypt('12345678')]
             );
 
             Auth::login($user);

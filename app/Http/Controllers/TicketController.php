@@ -12,149 +12,22 @@ use App\Http\Requests\TicketRequest;
 
 class TicketController extends Controller
 {
-
     public function index()
     {
-        // Obtenemos los datos normalmente
-        $tickets = Ticket::with(['seller', 'items'])->latest()->get();
+        $fecha  = request('fecha', date('Y-m-d'));
+        $buscar = request('buscar');
 
-        // Retornamos la vista (por ejemplo, resources/views/tickets/index.blade.php)
-        // pasando la variable 'tickets'
-        return view('tickets.index', compact('tickets'));
+        $tickets = Ticket::whereDate('created_at', $fecha)
+            ->when($buscar, fn($q) => $q->where('ticket_number', 'LIKE', "%{$buscar}%"))
+            ->latest()
+            ->get();
+
+        return view('tickets.index', compact('tickets', 'fecha'));
     }
 
-    public function show($numero)
+    public function show($ticket_number)
     {
-        $ticket = Ticket::with('items')->where('ticket_number', $numero)->firstOrFail();
-
+        $ticket = Ticket::with('items')->where('ticket_number', $ticket_number)->first();
         return view('tickets.show', compact('ticket'));
-    }
-
-    /**
-     * Almacena un nuevo ticket junto con sus ítems.
-     * Este es el endpoint que consumirá la extensión de Chrome.
-     */
-    public function store(TicketRequest $request)
-    {
-        // Usamos una transacción para garantizar la integridad de los datos.
-        try {
-            DB::beginTransaction();
-
-            // Buscamos al vendedor por su código, que es más robusto que un ID.
-            $seller = Seller::where('employee_code', $request->input('seller_employee_code'))->firstOrFail();
-
-            // 3. Creamos el Ticket principal.
-            $ticket = Ticket::create([
-                'ticket_number' => $request->input('ticket_number'),
-                'seller_id'     => $seller->id,
-                'total_amount'  => $request->input('total_amount'),
-                'issued_at'     => $request->input('issued_at'),
-            ]);
-
-            // Creamos todos los ítems asociados a ese ticket
-            $ticket->items()->createMany($request->input('items'));
-
-            // Si todo ha ido bien, confirmamos los cambios en la base de datos.
-            DB::commit();
-
-            // almacenar en log
-            Log::info('Ticket creado con éxito', [
-                'ticket_number' => $request->input('ticket_number'),
-                'seller_code'   => $request->input('seller_employee_code'),
-                'total_amount'  => $request->input('total_amount'),
-                'items_count'   => count($request->input('items', []))
-            ]);
-
-            return response()->json([
-                'message' => 'Ticket y sus ítems creados con éxito.',
-                'ticket_id' => $ticket->id,
-            ], 201); // 201: Created
-
-        } catch (Throwable $e) {
-            // Si algo falla, revertimos todos los cambios.
-            DB::rollBack();
-
-            // almacenar en log
-            Log::error('Error al crear Ticket', [
-                'ticket_number' => $request->input('ticket_number'),
-                'error'         => $e->getMessage(),
-                'linea'         => $e->getLine(),
-                'trace'         => $e->getTraceAsString()
-            ]);
-
-            // Y devolvemos un error para que se pueda depurar.
-            return response()->json([
-                'message' => 'Error al crear el ticket.',
-                'error' => $e->getMessage()
-            ], 500); // 500: Internal Server Error
-        }
-    }
-
-    /**
-     * Almacena un ticket actualizado junto con sus ítems.
-     * Este es el endpoint que consumirá la extensión de Chrome.
-     */
-    public function update(TicketRequest $request, $ticket_number)
-    {
-        // 1. Buscamos el ticket por su número interno
-        $ticket = Ticket::where('ticket_number', $ticket_number)->first();
-
-        if (!$ticket) {
-            return response()->json(['message' => 'Ticket no encontrado.'], 404);
-        }
-
-        // Guardamos el ID interno
-        $ticketId = $ticket->id;
-
-        // Proceso de actualización con Transacción
-        try {
-            DB::beginTransaction();
-
-            $seller = Seller::where('employee_code', $request->input('seller_employee_code'))->firstOrFail();
-
-            // Actualizamos la cabecera
-            $ticket->update([
-                'ticket_number' => $request->input('ticket_number'), // Por si la extensión decide corregir el número
-                'seller_id'     => $seller->id,
-                'total_amount'  => $request->input('total_amount'),
-                'issued_at'     => $request->input('issued_at'),
-            ]);
-
-            // Drop: Eliminamos los ítems viejos asociados
-            $ticket->items()->delete();
-
-            // Recreate: Insertamos los nuevos ítems en lote
-            $ticket->items()->createMany($request->input('items'));
-
-            DB::commit();
-
-            // almacenar en log
-            Log::info('Ticket editado con éxito', [
-                'ticket_number' => $request->input('ticket_number'),
-                'seller_code'   => $request->input('seller_employee_code'),
-                'total_amount'  => $request->input('total_amount'),
-                'items_count'   => count($request->input('items', []))
-            ]);
-
-            return response()->json([
-                'message' => 'Ticket e ítems actualizados con éxito (recreación por número de ticket).',
-                'ticket_id' => $ticket->id
-            ], 200);
-        } catch (Throwable $e) {
-            DB::rollBack();
-
-            // almacenar en log
-            Log::error('Error al editar Ticket', [
-                'ticket_number' => $request->input('ticket_number'),
-                'error'         => $e->getMessage(),
-                'linea'         => $e->getLine(),
-                'trace'         => $e->getTraceAsString()
-            ]);
-
-            return response()->json([
-                'message' => 'Error al actualizar el ticket.',
-                'error' => $e->getMessage()
-            ], 500);
-        }
     }
 }

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MOCK - Salida (Ticket generado)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        .info-box {
+            background: #fff;
+            padding: 20px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+        }
+
+        a.volver {
+            display: inline-block;
+            margin-top: 20px;
+            color: #007bff;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>MOCK - Página de retorno (post-pago)</h2>
+
+    <div class="info-box">
+        <p>Esta página simula la recarga que hace Laravel/BICOM después de procesar el pago.</p>
+        <p>El siguiente link es el que <code>content.js</code> debe detectar y reportar al background:</p>
+
+        <!--
+            Este es el elemento clave: mismo patrón que en producción.
+            href = "#" significaría "sin ticket" (content.js lo ignoraría).
+            href = número real significa "hay ticket nuevo para emparejar".
+        -->
+        <a class="ticket_bimarket" type="button" href="#" target="_blank">Ticket pendiente</a>
+    </div>
+
+    <a class="volver" href="entrada.html">&larr; Volver a armar un pedido nuevo (nueva prueba)</a>
+
+    <script>
+        // IMPORTANTE: este script es inline y síncrono, se ejecuta durante el
+        // parseo del documento, mucho antes de que el content script de la
+        // extensión corra (document_idle). Por eso el href queda actualizado
+        // con tiempo de sobra antes de que la extensión lo lea.
+        //
+        // Este bloque es solo parte del MOCK: en producción es Laravel/Blade
+        // quien renderiza el href directo en el HTML servido; la extensión
+        // nunca sabe (ni le importa) que acá hay un query param.
+        (function () {
+            const params = new URLSearchParams(window.location.search);
+            const idTicket = params.get('idTicket') || '234567'; // fallback por si se abre directo
+
+            const link = document.querySelector('.ticket_bimarket');
+            link.setAttribute('href', idTicket);
+            link.textContent = 'Ticket #' + idTicket;
+        })();
+    </script>
+
+</body>
+
+</html>

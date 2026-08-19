@@ -11,7 +11,7 @@
 
     <div class="bg-gray-900 border border-white/10 rounded-xl p-8 w-80 flex flex-col gap-0">
 
-        <p class="text-white font-medium tracking-widest uppercase text-lg mb-1">Gestión</p>
+        <p class="text-white font-medium tracking-widest uppercase text-lg mb-1">Gestión Picking</p>
         <p class="text-white/35 text-sm mb-8">Inicia sesión para continuar</p>
 
         @if(session('error'))

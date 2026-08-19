@@ -54,7 +54,7 @@
               border-b border-white/[0.07]">
     <div>Cliente</div>
     <div>Ticket</div>
-    <div>Picker</div>
+    <div>Vendedor</div>
     <div class="text-center">Estado</div>
   </div>
 
@@ -63,9 +63,9 @@
       <a href="{{ route('tickets.show', $ticket->ticket_number) }}"
          class="grid grid-cols-2 md:grid-cols-4 items-center px-4 py-4
                 hover:bg-slate-800/20 transition-colors cursor-pointer">
-        <div class="text-sm font-bold text-white">{{ strtoupper($ticket->seller->name ?? '—') }}</div>
+        <div class="text-sm font-bold text-white">{{ $ticket->customer ?? '—' }}</div>
         <div class="text-sm text-white/55">{{ $ticket->ticket_number }}</div>
-        <div class="hidden md:block text-sm text-white/55">{{ $ticket->seller->employee_code ?? '—' }}</div>
+        <div class="hidden md:block text-sm text-white/55">{{ $ticket->seller ?? '—' }}</div>
         <div class="text-right md:text-center">
           @if($ticket->status === 'pending')
             <span class="inline-block px-2.5 py-0.5 text-[11px] font-black tracking-wider

@@ -5,8 +5,7 @@ use Illuminate\Support\Facades\Route;
 
 // API Controller demo
 use App\Http\Controllers\ItemController;
-use App\Http\Controllers\TicketController;
-
+use App\Http\Controllers\Api\TicketController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -31,6 +30,13 @@ Route::get('/prueba-items', function () {
 Route::apiResource('items', ItemController::class);
 
 // API Router Ticket
-Route::post('/tickets', [TicketController::class, 'store']);
-Route::put('/tickets/{ticket_number}', [TicketController::class, 'update']);
-Route::get('/tickets/{ticket_number}', [TicketController::class, 'show']);
+//Route::post('/tickets', [TicketController::class, 'store']);
+//Route::put('/tickets/{ticket_number}', [TicketController::class, 'update']);
+//Route::get('/tickets/{ticket_number}', [TicketController::class, 'show']);
+
+// API — extensión Chrome (sin middleware auth, con sanctum o token si se requiere después)
+Route::post('/ticket',                [TicketController::class, 'store']);
+Route::put('/ticket/{ticket_number}', [TicketController::class, 'update']);
+
+// TICKETS NUEVOS
+Route::get('/ticket/latest', [TicketController::class, 'latest']);

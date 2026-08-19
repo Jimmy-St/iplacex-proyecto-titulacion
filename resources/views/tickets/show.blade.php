@@ -21,36 +21,35 @@
         status: '{{ $ticket->status ?? 'PENDIENTE' }}',
         showStatusDropdown: false,
         showPickerModal: false,
-        showPaymentAlert: false,    // Modal 1: Bloqueo por falta de pago
-        showCompletionConfirm: false, // Modal 2: Confirmación de paso crítico
+        showPaymentAlert: false,    
+        showCompletionConfirm: false, 
         
-        // VARIABLE CONTROLADORA DEL PAGO 
+        // VARIABLE EN DURO CONTROLADORA DEL PAGO
         isPaid: true, 
         
-        // Base de datos simulada de Pickers
+        // Base de datos simulada de Pickers incluyendo tareas vivas simuladas (tasks)
         availablePickers: [
-            { id: 1, name: 'Juan Pérez' },
-            { id: 2, name: 'María Inés' },
-            { id: 3, name: 'Carlos Soto' },
-            { id: 4, name: 'Ana Luz' },
-            { id: 5, name: 'Diego Silva' },
-            { id: 6, name: 'Laura Rodríguez' },
-            { id: 7, name: 'Pedro Gómez' },
-            { id: 8, name: 'Sofía García' },
-            { id: 9, name: 'Daniel Garrido' }
+            { id: 1, name: 'Juan Pérez', tasks: 0 },
+            { id: 2, name: 'María Inés de las Mercedes', tasks: 1 }, {{-- Nombre largo para probar truncado --}}
+            { id: 3, name: 'Carlos Soto', tasks: 0 },
+            { id: 4, name: 'Ana Luz', tasks: 3 },
+            { id: 5, name: 'Diego Silva', tasks: 0 },
+            { id: 6, name: 'Laura Rodríguez', tasks: 2 },
+            { id: 7, name: 'Pedro Gómez López', tasks: 1 },
+            { id: 8, name: 'Sofía García', tasks: 0 },
+            { id: 9, name: 'Daniel Garrido', tasks: 4 }
         ],
         
         assignedPickers: [], 
         modalPickers: [],    
         
-        // Interceptor inteligente del Dropdown de Estados
         changeStatus(newStatus) {
             if (newStatus === 'COMPLETADO') {
                 this.showStatusDropdown = false;
                 if (!this.isPaid) {
-                    this.showPaymentAlert = true; // Bloqueo si no está pagado
+                    this.showPaymentAlert = true; 
                 } else {
-                    this.showCompletionConfirm = true; // Confirmación si SÍ está pagado
+                    this.showCompletionConfirm = true; 
                 }
                 return;
             }
@@ -58,13 +57,11 @@
             this.showStatusDropdown = false;
         },
         
-        // Ejecución real del hito final tras confirmar en el modal
         executeCompletion() {
             this.status = 'COMPLETADO';
             this.showCompletionConfirm = false;
         },
         
-        // Métodos de apertura y confirmación atómica con automatización de estados
         openModal() {
             this.modalPickers = [...this.assignedPickers];
             this.showPickerModal = true;
@@ -114,7 +111,7 @@
                             <h1 class="text-xl font-semibold text-white tracking-tight">#{{ $ticket->ticket_number }}</h1>
                         </div>
 
-                        {{-- Badge Tributario Superior Derecho --}}
+                        {{-- Badge Tributario --}}
                         <div class="flex items-center gap-2 bg-white/[0.02] border border-white/[0.06] rounded-xl px-3 py-2 mt-1">
                             <i data-lucide="file-text" class="w-5 h-5 text-purple-400" style="stroke-width:1.5"></i>
                             <div class="leading-none">
@@ -136,7 +133,7 @@
                         </div>
                     </div>
                     
-                    {{-- Dropdown de Estados con ancho fijo --}}
+                    {{-- Dropdown de Estados --}}
                     <div class="relative">
                         <button @click="showStatusDropdown = !showStatusDropdown" 
                                 @click.away="showStatusDropdown = false"
@@ -211,14 +208,14 @@
                     </button>
                 </div>
 
-                {{-- Tags Exteriores limpios --}}
+                {{-- Tags Exteriores Limpios (Sin Números ni X) --}}
                 <div class="flex flex-wrap gap-1.5 mt-2">
                     <template x-if="assignedPickers.length === 0">
                         <span class="text-xs text-white/25 italic py-1">Sin personal asignado</span>
                     </template>
                     <template x-for="p in assignedPickers" :key="p.id">
-                        <span class="inline-flex items-center bg-white/[0.04] border border-white/[0.06] rounded-lg px-2.5 py-0.5 text-[11px] text-white/70">
-                            <span x-text="p.name"></span>
+                        <span class="inline-flex items-center bg-white/[0.04] border border-white/[0.06] rounded-lg px-2.5 py-0.5 text-[11px] text-white/70 max-w-[140px]">
+                            <span class="truncate whitespace-nowrap" x-text="p.name"></span>
                         </span>
                     </template>
                 </div>
@@ -226,7 +223,7 @@
 
         </div>
 
-        {{-- MODAL ASIGNAR PICKERS CON SCROLL INTERNO CONTROLADO --}}
+        {{-- MODAL ASIGNAR PICKERS CON SCROLL INTERNO Y CONTROL DE TEXTO LARGO --}}
         <div x-show="showPickerModal" class="fixed inset-0 z-50 flex justify-end" style="display: none;" role="dialog" aria-modal="true">
             <div x-show="showPickerModal" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200" class="fixed inset-0 bg-black/60 backdrop-blur-sm" @click="showPickerModal = false"></div>
             
@@ -237,7 +234,7 @@
                  x-transition:leave="transition ease-in duration-200 transform" 
                  class="relative w-full max-w-md h-full bg-zinc-950 border-l border-white/[0.08] shadow-2xl flex flex-col text-white z-50 pb-20 md:pb-0 overflow-hidden">
                 
-                {{-- CABECERA FIJA --}}
+                {{-- Cabecera Fija --}}
                 <div class="p-4 border-b border-white/[0.06] flex items-center justify-between shrink-0">
                     <div>
                         <h3 class="text-sm font-semibold">Asignación de Personal</h3>
@@ -246,29 +243,42 @@
                     <button @click="showPickerModal = false" class="p-1 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/[0.04]"><i data-lucide="x" class="w-5 h-5"></i></button>
                 </div>
 
-                {{-- CUERPO CONTENEDOR CON SCROLL INTEGRADO --}}
+                {{-- Cuerpo del Modal con Scroll Único --}}
                 <div class="flex-1 overflow-y-auto p-4 flex flex-col md:flex-row gap-4 mb-6 md:mb-0 custom-scrollbar">
-                    <div class="flex-1">
+                    
+                    {{-- LADO IZQUIERDO: Disponibles (Con Blindaje Antideforme y Contador a la Derecha) --}}
+                    <div class="flex-1 min-w-0">
                         <p class="text-[10px] text-white/35 uppercase tracking-widest font-semibold mb-2 sticky top-0 bg-zinc-950 py-1 z-10">Disponibles</p>
                         <div class="space-y-1.5">
                             <template x-for="picker in availablePickers" :key="picker.id">
                                 <button @click="addPickerToModal(picker)" 
-                                        class="w-full flex items-center justify-between text-left p-2.5 rounded-xl border text-xs transition-all" 
+                                        class="w-full flex items-center justify-between text-left p-2.5 rounded-xl border text-xs transition-all gap-3 min-w-0" 
                                         :class="modalPickers.find(p => p.id === picker.id) ? 'bg-zinc-900 border-white/[0.02] text-white/20 cursor-not-allowed' : 'bg-white/[0.02] border-white/[0.05] hover:border-white/[0.15] text-white/80 hover:bg-white/[0.04]'">
-                                    <span x-text="picker.name"></span>
-                                    <i data-lucide="plus" class="w-3.5 h-3.5" x-show="!modalPickers.find(p => p.id === picker.id)"></i>
+                                    
+                                    {{-- Contenedor del nombre blindado contra dos líneas --}}
+                                    <span class="truncate whitespace-nowrap flex-1 min-w-0" x-text="picker.name"></span>
+                                    
+                                    {{-- Badge Circular de Tareas Vivas a la Derecha (Semáforo Pasivo) --}}
+                                    <span class="flex items-center justify-center shrink-0 w-5 h-5 rounded-full text-[10px] font-bold font-mono tracking-tighter"
+                                          :class="{
+                                              'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20': picker.tasks === 0,
+                                              'bg-amber-500/10 text-amber-400 border border-amber-500/20': picker.tasks > 0
+                                          }"
+                                          x-text="picker.tasks">
+                                    </span>
                                 </button>
                             </template>
                         </div>
                     </div>
                     
-                    <div class="w-full md:w-44 bg-white/[0.01] border border-white/[0.04] rounded-xl p-3 flex flex-col h-fit md:sticky md:top-0">
+                    {{-- LADO DERECHO: Selección en Modal (Truncado Elegante sin Números) --}}
+                    <div class="w-full md:w-44 bg-white/[0.01] border border-white/[0.04] rounded-xl p-3 flex flex-col h-fit md:sticky md:top-0 min-w-0">
                         <p class="text-[10px] text-white/35 uppercase tracking-widest font-semibold mb-2">Selección</p>
-                        <div class="space-y-1.5">
+                        <div class="space-y-1.5 min-w-0">
                             <template x-for="p in modalPickers" :key="p.id">
-                                <div class="flex items-center justify-between bg-purple-500/10 border border-purple-500/20 text-purple-300 rounded-lg p-2 text-xs">
-                                    <span class="truncate pr-1" x-text="p.name"></span>
-                                    <button @click="removePickerFromModal(p.id)" class="text-purple-400 hover:text-white transition-colors p-0.5 flex items-center justify-center">
+                                <div class="flex items-center justify-between bg-purple-500/10 border border-purple-500/20 text-purple-300 rounded-lg p-2 text-xs gap-2 min-w-0">
+                                    <span class="truncate whitespace-nowrap flex-1 min-w-0" x-text="p.name"></span>
+                                    <button @click="removePickerFromModal(p.id)" class="text-purple-400 hover:text-white transition-colors p-0.5 flex items-center justify-center shrink-0">
                                         <span x-html="document.getElementById('icono-eliminar').innerHTML"></span>
                                     </button>
                                 </div>
@@ -280,16 +290,14 @@
                     </div>
                 </div>
 
-                {{-- FOOTER FIJO --}}
+                {{-- Footer Fijo --}}
                 <div class="p-4 border-t border-white/[0.06] bg-zinc-900/40 shrink-0">
                     <button @click="confirmSelection()" class="w-full bg-white text-zinc-950 font-medium py-2.5 rounded-xl text-xs hover:bg-white/90 transition-colors shadow-lg">Confirmar Selección</button>
                 </div>
             </div>
         </div>
 
-        {{-- ========================================================================= --}}
-        {{-- MODAL 1: ERROR DE PAGO PENDIENTE (BLOQUEO INTERNO)                         --}}
-        {{-- ========================================================================= --}}
+        {{-- MODAL 1: AVISO PAGO PENDIENTE --}}
         <div x-show="showPaymentAlert" class="fixed inset-0 z-[100] flex items-center justify-center p-4" style="display: none;" role="dialog" aria-modal="true">
             <div x-show="showPaymentAlert" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" class="fixed inset-0 bg-black/70 backdrop-blur-md" @click="showPaymentAlert = false"></div>
             
@@ -303,28 +311,20 @@
                 <div class="mx-auto flex items-center justify-center h-14 w-14 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 mb-4">
                     <i data-lucide="shield-alert" class="w-7 h-7" style="stroke-width:1.5"></i>
                 </div>
-                
                 <h3 class="text-sm font-semibold text-white tracking-tight">Acción Bloqueada</h3>
                 <p class="text-xs text-white/50 mt-2 leading-relaxed">
                     El Ticket aún no ha sido pagado, por favor revisar de forma interna antes de completar el pedido.
                 </p>
-                
                 <div class="mt-5">
-                    <button @click="showPaymentAlert = false" class="w-full bg-white/[0.04] border border-white/[0.08] text-white/80 hover:text-white hover:bg-white/[0.08] font-medium py-2 rounded-xl text-xs transition-colors">
-                        Entendido, revisar
-                    </button>
+                    <button @click="showPaymentAlert = false" class="w-full bg-white/[0.04] border border-white/[0.08] text-white/80 hover:text-white hover:bg-white/[0.08] font-medium py-2 rounded-xl text-xs transition-colors">Entendido, revisar</button>
                 </div>
             </div>
         </div>
 
-        {{-- ========================================================================= --}}
-        {{-- MODAL 2: CONFIRMACIÓN DOBLE BOTÓN - PASO CRÍTICO A COMPLETADO             --}}
-        {{-- ========================================================================= --}}
+        {{-- MODAL 2: CONFIRMACIÓN PASO CRÍTICO A COMPLETADO --}}
         <div x-show="showCompletionConfirm" class="fixed inset-0 z-[100] flex items-center justify-center p-4" style="display: none;" role="dialog" aria-modal="true">
-            {{-- Fondo de desenfoque --}}
             <div x-show="showCompletionConfirm" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" class="fixed inset-0 bg-black/70 backdrop-blur-md" @click="showCompletionConfirm = false"></div>
             
-            {{-- Tarjeta de Confirmación --}}
             <div x-show="showCompletionConfirm" 
                  x-transition:enter="transition ease-out duration-200 transform" 
                  x-transition:enter-start="opacity-0 scale-95" 
@@ -332,26 +332,16 @@
                  x-transition:leave="transition ease-in duration-150 transform" 
                  class="relative w-full max-w-sm bg-zinc-900 border border-white/[0.08] rounded-2xl p-6 text-center shadow-2xl z-50">
                 
-                {{-- Icono de Verificación Logística Intermitente --}}
                 <div class="mx-auto flex items-center justify-center h-14 w-14 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 mb-4">
                     <i data-lucide="check-circle-2" class="w-7 h-7" style="stroke-width:1.5"></i>
                 </div>
-                
                 <h3 class="text-sm font-semibold text-white tracking-tight">¿Cerrar Preparación de Ticket?</h3>
                 <p class="text-xs text-white/50 mt-2 leading-relaxed">
                     Estás a punto de marcar este pedido como <span class="text-emerald-400 font-medium">COMPLETADO</span>. Esto liberará la dotación de pickers asignada y cerrará el flujo. ¿Proceder?
                 </p>
-                
-                {{-- Bloque de Doble Botón Equilibrado --}}
                 <div class="grid grid-cols-2 gap-3 mt-6">
-                    <button @click="showCompletionConfirm = false" 
-                            class="w-full bg-white/[0.02] border border-white/[0.06] text-white/60 hover:text-white hover:bg-white/[0.04] font-medium py-2.5 rounded-xl text-xs transition-colors">
-                        Aún no
-                    </button>
-                    <button @click="executeCompletion()" 
-                            class="w-full bg-emerald-500 text-zinc-950 hover:bg-emerald-400 font-semibold py-2.5 rounded-xl text-xs transition-colors shadow-lg shadow-emerald-500/10">
-                        Sí, Completar
-                    </button>
+                    <button @click="showCompletionConfirm = false" class="w-full bg-white/[0.02] border border-white/[0.06] text-white/60 hover:text-white hover:bg-white/[0.04] font-medium py-2.5 rounded-xl text-xs transition-colors">Aún no</button>
+                    <button @click="executeCompletion()" class="w-full bg-emerald-500 text-zinc-950 hover:bg-emerald-400 font-semibold py-2.5 rounded-xl text-xs transition-colors shadow-lg shadow-emerald-500/10">Sí, Completar</button>
                 </div>
             </div>
         </div>
@@ -359,43 +349,19 @@
     </div> {{-- Cierre de x-data --}}
 
     {{-- GRILLA DE PRODUCTOS --}}
-    <div class="hidden md:grid md:grid-cols-4 px-4 py-2.5
-                text-[11px] font-semibold text-white/30 uppercase tracking-widest
-                border-b border-white/[0.07] mt-4">
-      <div class="col-span-2">Producto</div>
-      <div class="text-center">Cantidad</div>
-      <div class="text-right">Precio</div>
-    </div>
-
-    <div class="divide-y divide-white/[0.05]">
-      @forelse($ticket->items as $item)
-        <div class="grid grid-cols-2 md:grid-cols-4 items-center px-4 py-3.5 hover:bg-slate-800/20 transition-colors">
-          <div class="col-span-2 text-sm text-white">{{ $item->product_name ?? '—' }}</div>
-          <div class="hidden md:block text-sm text-white/55 text-center">{{ $item->quantity }}</div>
-          <div class="text-sm text-white/55 text-right">${{ number_format($item->price, 0, ',', '.') }}</div>
-        </div>
-      @empty
-        <div class="px-4 py-8 text-center text-white/25 text-sm">Sin ítems registrados</div>
-      @endforelse
-    </div>
+    <x-tickets.product-grid :items="$ticket->items" />
 
   @else
     {{-- VISTA ERROR CONTROLADO --}}
     <div class="mb-6 flex items-center gap-3">
-      <a href="{{ route('tickets.index') }}"
-         class="flex items-center gap-1.5 text-white/35 hover:text-white/70 text-sm transition-colors">
-        <i data-lucide="arrow-left" class="w-4 h-4" style="stroke-width:1.5"></i>
-        Volver al listado
-      </a>
+      <a href="{{ route('tickets.index') }}" class="flex items-center gap-1.5 text-white/35 hover:text-white/70 text-sm transition-colors"><i data-lucide="arrow-left" class="w-4 h-4" style="stroke-width:1.5"></i>Volver al listado</a>
     </div>
-
     <div class="flex flex-col items-center justify-center min-h-[45vh] text-center border border-dashed border-white/[0.06] rounded-xl p-8 bg-gray-900/20">
       <i data-lucide="frown" class="w-12 h-12 text-white/20 mb-4" style="stroke-width:1.2"></i>
       <h2 class="text-base font-medium text-white/80">Ticket no existe</h2>
     </div>
   @endif
 
-  {{-- Estilos utilitarios para la barra de scroll --}}
   <style>
       .custom-scrollbar::-webkit-scrollbar { width: 4px; }
       .custom-scrollbar::-webkit-scrollbar-track { bg: transparent; }

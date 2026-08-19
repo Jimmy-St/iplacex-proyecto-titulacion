@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MOCK - Entrada Pedido</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        h2, h3 {
+            color: #444;
+        }
+
+        .header-container {
+            background: #fff;
+            padding: 15px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        label {
+            font-weight: bold;
+            display: inline-block;
+            width: 150px;
+        }
+
+        input, select {
+            padding: 6px;
+            width: 300px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        #btnGuardar {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        #btnGuardar:hover {
+            background-color: #218838;
+        }
+
+        /* --- Modal simulado (reemplaza SweetAlert2) --- */
+        .swal2-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .swal2-container.active {
+            display: flex;
+        }
+
+        .swal2-popup {
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            text-align: center;
+            min-width: 320px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .swal2-title {
+            margin: 0 0 20px;
+            font-size: 20px;
+        }
+
+        .swal2-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        button.swal2-confirm {
+            background-color: #3085d6;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            font-size: 15px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        button.swal2-cancel {
+            background-color: #d33;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            font-size: 15px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>MOCK - Simulador de Pantalla de Pedido (Entrada)</h2>
+
+    <!-- Elementos generales de cabecera (mismos ids que catcher.js espera) -->
+    <div class="header-container">
+        <div class="form-group">
+            <label>Cliente:</label>
+            <span class="select2-selection__rendered" id="select2-select_customer-container" role="textbox"
+                aria-readonly="true" title="CLIENTE AUTOATENCION">CLIENTE AUTOATENCION</span>
+        </div>
+        <div class="form-group">
+            <label for="seller_id">Vendedor:</label>
+            <select class="form-control" name="seller_id" id="seller_id">
+                <option value="1">Jenifer Morales P.</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="ticket_payment_type_sii">Tipo de Pago:</label>
+            <select class="form-control" name="ticket_payment_type_sii" id="ticket_payment_type_sii">
+                <option value="2" selected="selected">CRÉDITO</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="descriptions">Glosa:</label>
+            <input class="form-control" type="text" name="descriptions" id="descriptions" placeholder="Glosa"
+                value="Pedido de prueba online">
+        </div>
+        <div class="form-group">
+            <label>Monto Total:</label>
+            <span class="pull-right" id="mtTotal"><strong>118.540</strong></span>
+        </div>
+    </div>
+
+    <!-- Tabla de Productos -->
+    <table class="table scroll" id="the_table_element" aria-hidden="true">
+        <thead>
+            <tr>
+                <th>Cód.</th>
+                <th>Prod./Precio</th>
+                <th>Cant.</th>
+                <th class="text-right">Descuento</th>
+                <th class="text-right">Precio</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="pedidoCuerpo">
+            <tr class="seleted" id="fila0">
+                <input type="hidden" id="idMov0" name="idMov[]" value="0">
+                <input type="hidden" id="idProd0" name="idProd[]" value="15976">
+                <td>17802800575029</td>
+                <td>
+                    <p style="margin-bottom:5px;">ZUKO BOMB PIÑA 4X6X200CC</p>
+                    <p>5000</p>
+                </td>
+                <td>
+                    <input style="width: 100%; padding:10px;" type="number" id="cantidad0" name="cantidad[]"
+                        value="1" class="cantidad">
+                </td>
+                <td class="text-right">$0</td>
+                <td class="text-right">5000</td>
+                <td style="font-size: 12px;">Acciones</td>
+            </tr>
+            <tr class="seleted" id="fila1">
+                <input type="hidden" id="idMov1" name="idMov[]" value="0">
+                <input type="hidden" id="idProd1" name="idProd[]" value="15559">
+                <td>00021000028474</td>
+                <td>
+                    <p style="margin-bottom:5px;">MAYONESA KRAFT MEDIANA 12X789 (887)GRS</p>
+                    <p>63.600</p>
+                </td>
+                <td>
+                    <input style="width: 100%; padding:10px;" type="number" id="cantidad1" name="cantidad[]"
+                        value="1" class="cantidad">
+                </td>
+                <td class="text-right">$0</td>
+                <td class="text-right">63.600</td>
+                <td style="font-size: 12px;">Acciones</td>
+            </tr>
+            <tr class="seleted" id="fila2">
+                <input type="hidden" id="idMov2" name="idMov[]" value="0">
+                <input type="hidden" id="idProd2" name="idProd[]" value="4577">
+                <td>00070177533991</td>
+                <td>
+                    <p style="margin-bottom:5px;">TE TWININGS ROJO BREAKFAST 6X50BS</p>
+                    <p>29.940</p>
+                </td>
+                <td>
+                    <input style="width: 100%; padding:10px;" type="number" id="cantidad2" name="cantidad[]"
+                        value="1" class="cantidad">
+                </td>
+                <td class="text-right">$0</td>
+                <td class="text-right">29.940</td>
+                <td style="font-size: 12px;">Acciones</td>
+            </tr>
+            <tr class="seleted" id="fila3">
+                <input type="hidden" id="idMov3" name="idMov[]" value="0">
+                <input type="hidden" id="idProd3" name="idProd[]" value="15465">
+                <td>01178004689830008</td>
+                <td>
+                    <p style="margin-bottom:5px;">SURCO CHUÑO 20X250GRS</p>
+                    <p>15.000</p>
+                </td>
+                <td>
+                    <input style="width: 100%; padding:10px;" type="number" id="cantidad3" name="cantidad[]"
+                        value="1" class="cantidad">
+                </td>
+                <td class="text-right">$0</td>
+                <td class="text-right">15.000</td>
+                <td style="font-size: 12px;">Acciones</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Caja de control del mock: permite cambiar el número de ticket sin tocar código -->
+    <div class="header-container">
+        <div class="form-group">
+            <label for="mockIdTicket">Ticket a simular:</label>
+            <input type="text" id="mockIdTicket" value="234567">
+        </div>
+    </div>
+
+    <!-- Este es el botón que content.js escucha (id="btnGuardar") -->
+    <button id="btnGuardar">Guardar Pedido</button>
+
+    <!-- Modal simulado, mismas clases que usaría SweetAlert2 (.swal2-confirm / .swal2-cancel) -->
+    <div class="swal2-container" id="mockModal">
+        <div class="swal2-popup">
+            <h3 class="swal2-title">¿Confirmar el pedido?</h3>
+            <div class="swal2-actions">
+                <button class="swal2-confirm" type="button">Sí, confirmar</button>
+                <button class="swal2-cancel" type="button">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Al hacer click en Guardar, mostramos el modal simulado
+        document.getElementById('btnGuardar').addEventListener('click', function () {
+            document.getElementById('mockModal').classList.add('active');
+        });
+
+        // Al confirmar: cerramos el modal y navegamos a salida.html,
+        // simulando la recarga completa que hace Laravel al procesar el pago.
+        // El idTicket viajero por query param es solo para uso del MOCK;
+        // la extensión nunca lo lee, solo lee el href final del <a class="ticket_bimarket">.
+        document.querySelector('.swal2-confirm').addEventListener('click', function () {
+            document.getElementById('mockModal').classList.remove('active');
+            const idTicket = document.getElementById('mockIdTicket').value.trim() || '234567';
+            window.location.href = 'salida.html?idTicket=' + encodeURIComponent(idTicket);
+        });
+
+        // Al cancelar: solo cerramos el modal, sin navegar ni guardar nada.
+        document.querySelector('.swal2-cancel').addEventListener('click', function () {
+            document.getElementById('mockModal').classList.remove('active');
+        });
+    </script>
+
+</body>
+
+</html>
