@@ -36,9 +36,9 @@ Route::post('/login',  [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Pantallas
-//Route::view('/screen/customers', 'screen.customers')->name('screen.customers');
+Route::view('/screen/customers', 'screen.customers')->name('screen.customers');
 //Route::view('/screen/pickers',   'screen.pickers')->name('screen.pickers');
-Route::view('/screen/customers', 'screen.splash_customers')->name('screen.customers');
+//Route::view('/screen/customers', 'screen.splash_customers')->name('screen.customers');
 Route::view('/screen/pickers',   'screen.splash_pickers')->name('screen.pickers');
 
 

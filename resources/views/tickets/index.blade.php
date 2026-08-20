@@ -49,35 +49,43 @@
     </div>
   </div>
 
-  <div class="hidden md:grid md:grid-cols-4 px-4 py-2.5
+  <div class="hidden md:flex items-center gap-3 px-4 py-2.5
               text-[11px] font-semibold text-white/30 uppercase tracking-widest
               border-b border-white/[0.07]">
-    <div>Cliente</div>
-    <div>Ticket</div>
-    <div>Vendedor</div>
-    <div class="text-center">Estado</div>
+    <div class="w-6 shrink-0"></div>
+    <div class="grid grid-cols-[2fr_1fr_1fr_0.7fr] gap-2 flex-1">
+      <div>Cliente</div>
+      <div>Ticket</div>
+      <div>Vendedor</div>
+      <div class="text-center">Estado</div>
+    </div>
   </div>
 
   <div class="divide-y divide-white/[0.05]">
     @forelse($tickets as $ticket)
       <a href="{{ route('tickets.show', $ticket->ticket_number) }}"
-         class="grid grid-cols-2 md:grid-cols-4 items-center px-4 py-4
+         class="flex items-center gap-3 px-4 py-4
                 hover:bg-slate-800/20 transition-colors cursor-pointer">
-        <div class="text-sm font-bold text-white">{{ $ticket->customer ?? '—' }}</div>
-        <div class="text-sm text-white/55">{{ $ticket->ticket_number }}</div>
-        <div class="hidden md:block text-sm text-white/55">{{ $ticket->seller ?? '—' }}</div>
-        <div class="text-right md:text-center">
-          @if($ticket->status === 'pending')
-            <span class="inline-block px-2.5 py-0.5 text-[11px] font-black tracking-wider
-                         bg-red-500/15 text-red-400 border border-red-500/25 rounded-md">
-              PEND.
-            </span>
-          @else
-            <span class="inline-block px-2.5 py-0.5 text-[11px] font-black tracking-wider
-                         bg-green-500/15 text-green-400 border border-green-500/25 rounded-md">
-              OK
-            </span>
-          @endif
+        <div class="w-6 shrink-0 text-center text-[11px] text-white/25 font-mono">
+          {{ $loop->iteration }}
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-[2fr_1fr_1fr_0.7fr] gap-2 flex-1 items-center">
+          <div class="text-sm font-bold text-white">{{ $ticket->customer ?? '—' }}</div>
+          <div class="text-sm text-white/55">{{ $ticket->ticket_number }}</div>
+          <div class="hidden md:block text-sm text-white/55">{{ $ticket->seller ?? '—' }}</div>
+          <div class="text-right md:text-center">
+            @if($ticket->status === 'pending')
+              <span class="inline-block px-2.5 py-0.5 text-[11px] font-black tracking-wider
+                           bg-red-500/15 text-red-400 border border-red-500/25 rounded-md">
+                PEND.
+              </span>
+            @else
+              <span class="inline-block px-2.5 py-0.5 text-[11px] font-black tracking-wider
+                           bg-green-500/15 text-green-400 border border-green-500/25 rounded-md">
+                OK
+              </span>
+            @endif
+          </div>
         </div>
       </a>
     @empty
