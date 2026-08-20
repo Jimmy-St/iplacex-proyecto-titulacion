@@ -25,7 +25,7 @@
         <div class="shrink-0 grid grid-cols-[2.5fr_1.2fr_1.3fr_0.8fr] items-center py-[0.6vh] px-[2vw] border-b border-slate-700">
             <span class="text-slate-400 font-bold tracking-wider text-[2vh]">CLIENTE</span>
             <span class="text-slate-400 font-bold tracking-wider text-[2vh]">TICKET</span>
-            <span class="text-slate-400 font-bold tracking-wider text-[2vh]">PICKER</span>
+            <span class="text-slate-400 font-bold tracking-wider text-[2vh]">VENDEDOR</span>
             <div class="flex justify-end gap-[0.8vw] text-slate-400 text-[1.6vh]">
                 <span>&#9664;</span>
                 <span>&#9654;</span>
