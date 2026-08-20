@@ -9,33 +9,8 @@
 </head>
 <body class="h-screen w-screen overflow-hidden bg-slate-900 flex items-center justify-center p-[1vh]">
 
-    @php
-        // Datos iniciales (fallback mientras carga el primer fetch a /api/latest)
-        $pedidos = [
-            ['cliente' => 'MARIO CARMONA', 'ticket' => '78676323', 'picker' => 'M. GONZALEZ', 'estado' => 'PEND'],
-            ['cliente' => 'MARIA G.',      'ticket' => '78676324', 'picker' => 'P. GARCIA',    'estado' => 'PEND'],
-            ['cliente' => 'ALEX SOTO',     'ticket' => '78676425', 'picker' => 'M. LENETA',    'estado' => 'PROG'],
-            ['cliente' => 'PEDRO R.',      'ticket' => '78673426', 'picker' => 'F. CLAROZ',    'estado' => 'COMP'],
-            ['cliente' => 'LUISA M.',      'ticket' => '78673427', 'picker' => 'J. RAMIREZ',   'estado' => 'PEND'],
-            ['cliente' => 'DAVID J.',      'ticket' => '78663428', 'picker' => 'S. LOPEZ',     'estado' => 'PROG'],
-            ['cliente' => 'CARMEN O.',     'ticket' => '78763429', 'picker' => 'M. GONZALEZ',  'estado' => 'COMP'],
-            ['cliente' => 'LUIS V.',       'ticket' => '76763430', 'picker' => 'P. GARCIA',    'estado' => 'PEND'],
-            ['cliente' => 'SOFIA K.',      'ticket' => '86763431', 'picker' => 'M. LENETA',    'estado' => 'COMP'],
-            ['cliente' => 'ROBERTO N.',    'ticket' => '78763432', 'picker' => 'J. RAMIREZ',   'estado' => 'PROG'],
-            ['cliente' => 'ANDREA P.',     'ticket' => '78763433', 'picker' => 'S. LOPEZ',     'estado' => 'PEND'],
-            ['cliente' => 'FELIPE T.',     'ticket' => '78763434', 'picker' => 'F. CLAROZ',    'estado' => 'COMP'],
-        ];
-
-        $badgeLabels = [
-            'PEND' => 'PEND.',
-            'PROG' => 'PROG.',
-            'COMP' => 'COMP.',
-        ];
-    @endphp
-
     <div
-        x-data="pedidosApp(@json($pedidos))"
-        x-init="init()"
+        x-data="pedidosApp"
         class="w-full h-full max-w-[1900px] bg-slate-900 border border-slate-700 rounded-2xl overflow-hidden shadow-2xl flex flex-col"
     >
 
@@ -57,7 +32,7 @@
             </div>
         </div>
 
-        {{-- Filas: se reparten el alto restante entre las 12, siempre exacto --}}
+        {{-- Filas dinámicas obtenidas desde la API --}}
         <div class="flex-1 flex flex-col min-h-0">
             <template x-for="(pedido, index) in pedidos" :key="pedido.ticket ?? index">
                 <div
@@ -80,9 +55,9 @@
     </div>
 
     <script>
-        function pedidosApp(initialPedidos) {
-            return {
-                pedidos: initialPedidos,
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('pedidosApp', () => ({
+                pedidos: [],
                 badgeLabels: {
                     PEND: 'PEND.',
                     PROG: 'PROG.',
@@ -93,12 +68,19 @@
                         const res = await fetch('/api/ticket/latest', {
                             headers: { 'Accept': 'application/json' },
                         });
-                        if (!res.ok) throw new Error('Respuesta no OK: ' + res.status);
+                        
+                        if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
+                        
                         const json = await res.json();
-                        // Soporta tanto array plano [...] como { data: [...] }
-                        const nuevos = Array.isArray(json) ? json : (json.data ?? []);
-                        if (Array.isArray(nuevos) && nuevos.length > 0) {
-                            this.pedidos = nuevos;
+                        const lista = json.tickets ?? json.data ?? (Array.isArray(json) ? json : []);
+
+                        if (Array.isArray(lista) && lista.length > 0) {
+                            this.pedidos = lista.map(item => ({
+                                cliente: item.customer || 'SIN CLIENTE',
+                                ticket: item.ticket_number || item.id,
+                                picker: item.seller || 'SIN ASIGNAR',
+                                estado: item.status || 'PEND'
+                            }));
                         }
                     } catch (e) {
                         console.error('Error al actualizar pedidos:', e);
@@ -107,9 +89,9 @@
                 init() {
                     this.fetchPedidos();
                     setInterval(() => this.fetchPedidos(), 30000);
-                },
-            };
-        }
+                }
+            }));
+        });
     </script>
 
 </body>
