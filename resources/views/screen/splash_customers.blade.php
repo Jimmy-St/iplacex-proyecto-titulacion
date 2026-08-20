@@ -92,7 +92,7 @@
             </svg>
         </div>
         <h1 class="splash-title">PICKING</h1>
-        <h1 class="splash-name">customers screen</h1>
+        <h1 class="splash-name">customers screen 2</h1>
     </div>
 </body>
 </html>
