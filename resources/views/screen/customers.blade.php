@@ -22,11 +22,11 @@
         </div>
 
         {{-- Encabezado de columnas --}}
-        <div class="shrink-0 grid grid-cols-[2.5fr_1.2fr_1.3fr_0.8fr] items-center py-[0.6vh] px-[2vw] border-b border-slate-700">
+        <div class="shrink-0 grid grid-cols-[2.5fr_1fr_1.1fr_0.5fr] items-center py-[0.6vh] px-[2vw] border-b border-slate-700">
             <span class="text-slate-400 font-bold tracking-wider text-[2vh]">CLIENTE</span>
             <span class="text-slate-400 font-bold tracking-wider text-[2vh]">TICKET</span>
             <span class="text-slate-400 font-bold tracking-wider text-[2vh]">VENDEDOR</span>
-            <div class="flex justify-end gap-[0.8vw] text-slate-400 text-[1.6vh]">
+            <div class="flex justify-end gap-[0.8vw] text-slate-400 text-[2.6vh]">
                 <span>&#9664;</span>
                 <span>&#9654;</span>
             </div>
@@ -36,15 +36,15 @@
         <div class="flex-1 flex flex-col min-h-0">
             <template x-for="(pedido, index) in pedidos" :key="pedido.ticket ?? index">
                 <div
-                    class="flex-1 grid grid-cols-[2.5fr_1.2fr_1.3fr_0.8fr] items-center px-[2vw]"
+                    class="flex-1 grid grid-cols-[2.5fr_1fr_1.1fr_0.5fr] items-center px-[2vw]"
                     :class="index % 2 === 0 ? 'bg-slate-800/40' : 'bg-transparent'"
                 >
-                    <span class="text-amber-50 font-extrabold text-[3vh] truncate pr-[1vw]" x-text="pedido.cliente"></span>
-                    <span class="text-slate-300 font-bold text-[3.8vh]" x-text="pedido.ticket"></span>
-                    <span class="text-amber-50 font-extrabold text-[3vh] truncate pr-[1vw]" x-text="pedido.picker"></span>
+                    <span class="text-amber-50 font-extrabold text-[3.5vh] truncate pr-[1vw] uppercase" x-text="pedido.cliente"></span>
+                    <span class="text-slate-300 font-bold text-[4.3vh]" x-text="pedido.ticket"></span>
+                    <span class="text-amber-50 font-extrabold text-[3.2vh] truncate pr-[1vw] uppercase" x-text="pedido.picker"></span>
                     <div class="flex justify-end">
                         <span
-                            class="bg-green-600 text-white font-bold text-[1.3vh] px-[1vw] py-[0.5vh] rounded-md whitespace-nowrap"
+                            class="bg-green-600 text-white uppercase font-bold text-[1.3vh] px-[1vw] py-[0.5vh] rounded-md whitespace-nowrap"
                             x-text="badgeLabels[pedido.estado] ?? pedido.estado"
                         ></span>
                     </div>
