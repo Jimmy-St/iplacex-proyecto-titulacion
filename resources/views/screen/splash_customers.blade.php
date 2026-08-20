@@ -63,7 +63,7 @@
         @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: translateY(-20px);
+                transform: translateY(0);
             }
             to {
                 opacity: 1;
@@ -73,10 +73,10 @@
 
         @keyframes float {
             0%, 100% {
-                transform: translateY(0);
+                transform: translateY(-12px);
             }
             50% {
-                transform: translateY(-12px);
+                transform: translateY(0);
             }
         }
     </style>
