@@ -71,9 +71,7 @@
     </style>
 </head>
 <body>
-
     <div class="splash-container">
-        <h1 class="splash-title">PICKING</h1>
         <div class="logo-wrapper">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.0" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-package-icon lucide-package">
                 <path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/>
@@ -82,6 +80,7 @@
                 <path d="m7.5 4.27 9 5.15"/>
             </svg>
         </div>
+        <h1 class="splash-title">PICKING</h1>
         <h1 class="splash-name">pickers screen</h1>
     </div>
 
