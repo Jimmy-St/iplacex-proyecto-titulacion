@@ -8,15 +8,17 @@ use App\Http\Controllers\ProductosController;
 use App\Http\Controllers\ReportesController;
 use App\Http\Controllers\ConfigController;
 
-// Login
-Route::get('/login',   [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login',  [AuthController::class, 'login']);
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+// Rutas de invitados (Si ya estás logueado, te saca del login y te manda a los tickets)
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+});
 
-// Pantallas
+// Ruta de cierre de sesión (Solo accesible si estás autenticado)
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
+
+// Pantallas públicas / informativas (según definiste en tu estructura)
 Route::view('/screen/customers', 'screen.customers')->name('screen.customers');
-//Route::view('/screen/pickers',   'screen.pickers')->name('screen.pickers');
-//Route::view('/screen/customers', 'screen.splash_customers')->name('screen.customers');
 Route::view('/screen/pickers',   'screen.splash_pickers')->name('screen.pickers');
 
 // Secciones protegidas
