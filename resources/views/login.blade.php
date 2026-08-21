@@ -9,16 +9,26 @@
 </head>
 <body class="bg-gray-950 min-h-screen flex items-center justify-center">
 
-    <div class="bg-gray-900 border border-white/10 rounded-xl p-8 w-80 flex flex-col gap-0">
+    <div class="bg-gray-900 border border-white/10 rounded-xl p-8 w-80 flex flex-col items-center text-center">
 
-        <p class="text-white font-medium tracking-widest uppercase text-lg mb-1">Gestión Picking</p>
-        <p class="text-white/35 text-sm mb-8">Inicia sesión para continuar</p>
+        <!-- Ícono de paquete limpio (sin transparencias alfa) -->
+        <div class="mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="w-16 h-16 text-white">
+                <path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/>
+                <path d="M12 22V12"/>
+                <polyline points="3.29 7 12 12 20.71 7"/>
+                <path d="m7.5 4.27 9 5.15"/>
+            </svg>
+        </div>
+
+        <p class="text-white font-medium tracking-widest uppercase text-lg mb-4 w-full text-center">Gestión Picking</p>
+        
 
         @if(session('error'))
-            <p class="text-red-400 text-sm mb-4">{{ session('error') }}</p>
+            <p class="text-red-400 text-sm mb-4 w-full text-center">{{ session('error') }}</p>
         @endif
 
-        <form action="/login" method="POST" class="flex flex-col gap-4">
+        <form action="/login" method="POST" class="flex flex-col gap-4 w-full text-left">
             @csrf
 
             <div class="flex flex-col gap-1.5">
