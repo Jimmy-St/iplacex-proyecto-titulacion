@@ -41,8 +41,8 @@
           {{ request()->routeIs('productos*')
             ? 'bg-slate-700/50 text-purple-400 font-medium'
             : 'text-white/55 hover:bg-slate-800 hover:text-white/85' }}">
-        <i data-lucide="package" class="w-4 h-4" style="stroke-width:1.5"></i>
-        Productos
+        <i data-lucide="clock" class="w-4 h-4" style="stroke-width:1.5"></i>
+        Turnos
       </a>
 
       <a href="{{ route('reportes.index') }}"
@@ -107,8 +107,8 @@
 
       <a href="{{ route('productos.index') }}"
         class="flex flex-col items-center gap-1 {{ request()->routeIs('productos*') ? 'text-purple-400' : 'text-white/35' }}">
-        <i data-lucide="package" class="w-5 h-5" style="stroke-width:1.5"></i>
-        <span class="text-[10px]">Productos</span>
+        <i data-lucide="clock" class="w-5 h-5" style="stroke-width:1.5"></i>
+        <span class="text-[10px]">Turnos</span>
       </a>
 
       <a href="{{ route('reportes.index') }}"
