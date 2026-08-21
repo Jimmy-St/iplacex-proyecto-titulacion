@@ -10,5 +10,5 @@ class TotalDay extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['date', 'total_items', 'total_amount'];
+    protected $fillable = ['date', 'total_tickets', 'total_items', 'total_amount'];
 }
