@@ -30,14 +30,13 @@ class TicketController extends Controller
 
     public function show($ticket_number)
     {
-        return ticket_number;
+        return $ticket_number;
     }
 
     /**
      * Almacena un nuevo ticket junto con sus ítems.
      * Este es el endpoint que consumirá la extensión de Chrome.
      */
-    //public function store(TicketRequest $request)
     public function store(Request $request)
     {
         try {
@@ -65,24 +64,30 @@ class TicketController extends Controller
                 ];
             })->toArray();
 
-            // Modalidad normal de Laravel: un INSERT por item (createMany).
-            // La alternativa de un solo INSERT batch queda documentada abajo, comentada,
-            // por si más adelante se retoma por temas de concurrencia con SQLite.
             $ticket->items()->createMany($items);
 
-            /*
-            DB::table('ticket_items')->insert(
-                collect($items)->map(fn ($item) => array_merge($item, [
-                    'ticket_id'  => $ticket->id,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]))->toArray()
+            // ==========================================
+            // ACTUALIZACIÓN DE LA TABLA DE AGREGACIÓN TOTAL_DAY
+            // ==========================================
+            $today = now()->toDateString();
+
+            // Calculamos métricas del ticket entrante (sumatoria de cantidades de ítems y monto)
+            $ticketItemsCount = collect($items)->sum('quantity');
+            $ticketAmount = $ticket->total_amount;
+
+            DB::table('total_day')->updateOrInsert(
+                ['date' => $today],
+                [
+                    'total_tickets' => DB::raw('total_tickets + 1'),
+                    'total_items'   => DB::raw("total_items + {$ticketItemsCount}"),
+                    'total_amount'  => DB::raw("total_amount + {$ticketAmount}"),
+                ]
             );
-            */
+            // ==========================================
 
             DB::commit();
 
-            Log::info('Ticket creado con éxito', [
+            Log::info('Ticket creado con éxito y total_day actualizado', [
                 'ticket_number' => $ticket->ticket_number,
                 'seller'        => $ticket->seller,
                 'total_amount'  => $ticket->total_amount,
@@ -123,9 +128,6 @@ class TicketController extends Controller
             return response()->json(['message' => 'Ticket no encontrado.'], 404);
         }
 
-        // Guardamos el ID interno
-        $ticketId = $ticket->id;
-
         // Proceso de actualización con Transacción
         try {
             DB::beginTransaction();
@@ -134,7 +136,7 @@ class TicketController extends Controller
 
             // Actualizamos la cabecera
             $ticket->update([
-                'ticket_number' => $request->input('ticket_number'), // Por si la extensión decide corregir el número
+                'ticket_number' => $request->input('ticket_number'),
                 'seller_id'     => $seller->id,
                 'total_amount'  => $request->input('total_amount'),
                 'issued_at'     => $request->input('issued_at'),
@@ -148,7 +150,6 @@ class TicketController extends Controller
 
             DB::commit();
 
-            // almacenar en log
             Log::info('Ticket editado con éxito', [
                 'ticket_number' => $request->input('ticket_number'),
                 'seller_code'   => $request->input('seller_employee_code'),
@@ -163,7 +164,6 @@ class TicketController extends Controller
         } catch (Throwable $e) {
             DB::rollBack();
 
-            // almacenar en log
             Log::error('Error al editar Ticket', [
                 'ticket_number' => $request->input('ticket_number'),
                 'error'         => $e->getMessage(),
