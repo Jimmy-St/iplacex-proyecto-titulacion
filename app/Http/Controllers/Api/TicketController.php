@@ -70,19 +70,24 @@ class TicketController extends Controller
             // ACTUALIZACIÓN DE LA TABLA DE AGREGACIÓN TOTAL_DAY
             // ==========================================
             $today = now()->toDateString();
-
-            // Calculamos métricas del ticket entrante (sumatoria de cantidades de ítems y monto)
+            //$today = '2026-08-23';
             $ticketItemsCount = collect($items)->sum('quantity');
             $ticketAmount = $ticket->total_amount;
 
-            DB::table('total_day')->updateOrInsert(
-                ['date' => $today],
-                [
-                    'total_tickets' => DB::raw('total_tickets + 1'),
-                    'total_items'   => DB::raw("total_items + {$ticketItemsCount}"),
-                    'total_amount'  => DB::raw("total_amount + {$ticketAmount}"),
-                ]
-            );
+            // 1. Nos aseguramos de que exista el registro para el día de hoy (si no existe, lo crea en 0)
+            DB::table('total_day')->insertOrIgnore([
+                'date'          => $today,
+                'total_tickets' => 0,
+                'total_items'   => 0,
+                'total_amount'  => 0,
+            ]);
+
+            // 2. Incrementamos los valores de forma segura
+            DB::table('total_day')->where('date', $today)->update([
+                'total_tickets' => DB::raw('total_tickets + 1'),
+                'total_items'   => DB::raw("total_items + {$ticketItemsCount}"),
+                'total_amount'  => DB::raw("total_amount + {$ticketAmount}"),
+            ]);
             // ==========================================
 
             DB::commit();
