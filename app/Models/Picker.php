@@ -45,4 +45,10 @@ class Picker extends Model
     {
         return "{$this->first_name} {$this->last_name}";
     }
+
+    public function pickingTasks()
+    {
+        return $this->belongsToMany(PickingTask::class, 'picking_assignments')
+            ->withTimestamps();
+    }
 }

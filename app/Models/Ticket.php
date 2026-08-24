@@ -30,4 +30,12 @@ class Ticket extends Model
     {
         return $this->hasMany(TicketItem::class, 'ticket_id');
     }
+
+    /**
+     * Relación: Un Ticket tiene una Tarea
+     */
+    public function pickingTask()
+    {
+        return $this->hasOne(PickingTask::class);
+    }
 }

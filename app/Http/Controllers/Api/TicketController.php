@@ -66,6 +66,11 @@ class TicketController extends Controller
 
             $ticket->items()->createMany($items);
 
+            // AGREGAMOS TAREA
+            $ticket->pickingTask()->create([
+                'status' => 'pending', // Estado inicial por defecto
+            ]);
+
             // ==========================================
             // ACTUALIZACIÓN DE LA TABLA DE AGREGACIÓN TOTAL_DAY
             // ==========================================
