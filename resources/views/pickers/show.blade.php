@@ -28,6 +28,28 @@
     </div>
 
     <div class="flex items-center gap-2">
+
+      <!-- Componente Alpine.js para Presencia con íconos estáticos alternados -->
+      <div x-data="{ presente: true }">
+          <button @click="presente = !presente"
+              :class="presente 
+                  ? 'bg-emerald-500/20 border-emerald-500/60 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.25)]' 
+                  : 'bg-slate-800 border-white/[0.08] text-white/70 hover:text-white hover:bg-slate-700'"
+              class="w-36 h-[34px] inline-flex items-center justify-center gap-2 px-3 border rounded-lg text-xs font-medium transition-all">
+              
+              <!-- Ícono cuando está presente -->
+              <i data-lucide="user-check" class="w-3.5 h-3.5 shrink-0 text-emerald-400" x-show="presente"></i>
+              
+              <!-- Ícono cuando está ausente -->
+              <i data-lucide="user-x" class="w-3.5 h-3.5 shrink-0 text-white/50" x-show="!presente"></i>
+              
+              <span class="w-20 text-center truncate" x-text="presente ? 'Presente' : 'Ausente'"></span>
+          </button>
+      </div>
+      
+      <!-- Componente Colación -->
+      @livewire('picker-lunch-button', ['picker' => $picker])
+
       <a href="{{ route('pickers.edit', $picker) }}" 
          class="inline-flex items-center gap-2 px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-medium rounded-lg transition-colors border border-white/[0.08]">
         <i data-lucide="edit-2" class="w-3.5 h-3.5"></i>
