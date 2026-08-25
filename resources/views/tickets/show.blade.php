@@ -15,7 +15,9 @@
     {{-- ========================================================================= --}}
     {{-- VISTA DETALLE: Se renderiza si el Ticket SÍ existe                         --}}
     {{-- ========================================================================= --}}
-    
+    <script>
+        window.availablePickersData = @json($pickers);
+    </script>
     {{-- Contenedor Maestro Interactivo con Alpine.js --}}
     <div x-data="{ 
         status: '{{ $ticket->status ?? 'PENDIENTE' }}',
@@ -24,21 +26,10 @@
         showPaymentAlert: false,    
         showCompletionConfirm: false, 
         
-        // VARIABLE EN DURO CONTROLADORA DEL PAGO
         isPaid: true, 
         
-        // Base de datos simulada de Pickers incluyendo tareas vivas simuladas (tasks)
-        availablePickers: [
-            { id: 1, name: 'Juan Pérez', tasks: 0 },
-            { id: 2, name: 'María Inés de las Mercedes', tasks: 1 }, {{-- Nombre largo para probar truncado --}}
-            { id: 3, name: 'Carlos Soto', tasks: 0 },
-            { id: 4, name: 'Ana Luz', tasks: 3 },
-            { id: 5, name: 'Diego Silva', tasks: 0 },
-            { id: 6, name: 'Laura Rodríguez', tasks: 2 },
-            { id: 7, name: 'Pedro Gómez López', tasks: 1 },
-            { id: 8, name: 'Sofía García', tasks: 0 },
-            { id: 9, name: 'Daniel Garrido', tasks: 4 }
-        ],
+        {{-- PASO 2: Leemos la variable global de forma segura sin romper el HTML --}}
+        availablePickers: window.availablePickersData || [],
         
         assignedPickers: [], 
         modalPickers: [],    
@@ -215,7 +206,7 @@
                     </template>
                     <template x-for="p in assignedPickers" :key="p.id">
                         <span class="inline-flex items-center bg-white/[0.04] border border-white/[0.06] rounded-lg px-2.5 py-0.5 text-[11px] text-white/70 max-w-[140px]">
-                            <span class="truncate whitespace-nowrap" x-text="p.name"></span>
+                            <span class="truncate whitespace-nowrap" x-text="p.display_name"></span>
                         </span>
                     </template>
                 </div>
@@ -246,7 +237,7 @@
                 {{-- Cuerpo del Modal con Scroll Único --}}
                 <div class="flex-1 overflow-y-auto p-4 flex flex-col md:flex-row gap-4 mb-6 md:mb-0 custom-scrollbar">
                     
-                    {{-- LADO IZQUIERDO: Disponibles (Con Blindaje Antideforme y Contador a la Derecha) --}}
+                    {{-- LADO IZQUIERDO: Disponibles (Con Blindaje Antideforme) --}}
                     <div class="flex-1 min-w-0">
                         <p class="text-[10px] text-white/35 uppercase tracking-widest font-semibold mb-2 sticky top-0 bg-zinc-950 py-1 z-10">Disponibles</p>
                         <div class="space-y-1.5">
@@ -256,28 +247,24 @@
                                         :class="modalPickers.find(p => p.id === picker.id) ? 'bg-zinc-900 border-white/[0.02] text-white/20 cursor-not-allowed' : 'bg-white/[0.02] border-white/[0.05] hover:border-white/[0.15] text-white/80 hover:bg-white/[0.04]'">
                                     
                                     {{-- Contenedor del nombre blindado contra dos líneas --}}
-                                    <span class="truncate whitespace-nowrap flex-1 min-w-0" x-text="picker.name"></span>
+                                    <span class="truncate whitespace-nowrap flex-1 min-w-0" x-text="picker.display_name"></span>
                                     
-                                    {{-- Badge Circular de Tareas Vivas a la Derecha (Semáforo Pasivo) --}}
-                                    <span class="flex items-center justify-center shrink-0 w-5 h-5 rounded-full text-[10px] font-bold font-mono tracking-tighter"
-                                          :class="{
-                                              'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20': picker.tasks === 0,
-                                              'bg-amber-500/10 text-amber-400 border border-amber-500/20': picker.tasks > 0
-                                          }"
-                                          x-text="picker.tasks">
+                                    {{-- Indicador estético pasivo temporal --}}
+                                    <span class="flex items-center justify-center shrink-0 w-5 h-5 rounded-full text-[10px] font-bold font-mono tracking-tighter bg-white/[0.03] text-white/40 border border-white/[0.06]">
+                                        0
                                     </span>
                                 </button>
                             </template>
                         </div>
                     </div>
                     
-                    {{-- LADO DERECHO: Selección en Modal (Truncado Elegante sin Números) --}}
+                    {{-- LADO DERECHO: Selección en Modal --}}
                     <div class="w-full md:w-44 bg-white/[0.01] border border-white/[0.04] rounded-xl p-3 flex flex-col h-fit md:sticky md:top-0 min-w-0">
                         <p class="text-[10px] text-white/35 uppercase tracking-widest font-semibold mb-2">Selección</p>
                         <div class="space-y-1.5 min-w-0">
                             <template x-for="p in modalPickers" :key="p.id">
                                 <div class="flex items-center justify-between bg-purple-500/10 border border-purple-500/20 text-purple-300 rounded-lg p-2 text-xs gap-2 min-w-0">
-                                    <span class="truncate whitespace-nowrap flex-1 min-w-0" x-text="p.name"></span>
+                                    <span class="truncate whitespace-nowrap flex-1 min-w-0" x-text="p.display_name"></span>
                                     <button @click="removePickerFromModal(p.id)" class="text-purple-400 hover:text-white transition-colors p-0.5 flex items-center justify-center shrink-0">
                                         <span x-html="document.getElementById('icono-eliminar').innerHTML"></span>
                                     </button>
