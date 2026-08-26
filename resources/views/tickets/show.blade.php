@@ -3,7 +3,7 @@
 @section('content')
 
   {{-- ========================================================================= --}}
-  {{-- CAJA DE ICONOS OCULTOS: Lucide los renderiza aquí en el arranque inicial   --}}
+  {{-- CAJA DE ICONOS OCULTOS: Lucide los renderiza aquí en el arranque inicial    --}}
   {{-- ========================================================================= --}}
   <div class="hidden">
       <div id="icono-eliminar">
@@ -17,10 +17,13 @@
     {{-- ========================================================================= --}}
     <script>
         window.availablePickersData = @json($pickers);
+        window.assignedPickersData = @json($ticket->pickingTask && $ticket->pickingTask->pickers ? $ticket->pickingTask->pickers : []);
+        window.csrfToken = @json(csrf_token());
     </script>
+
     {{-- Contenedor Maestro Interactivo con Alpine.js --}}
     <div x-data="{ 
-        status: '{{ $ticket->status ?? 'PENDIENTE' }}',
+        status: '{{ optional($ticket->pickingTask)->status ?? 'PENDIENTE' }}',
         showStatusDropdown: false,
         showPickerModal: false,
         showPaymentAlert: false,    
@@ -28,13 +31,14 @@
         
         isPaid: true, 
         
-        {{-- PASO 2: Leemos la variable global de forma segura sin romper el HTML --}}
         availablePickers: window.availablePickersData || [],
-        
-        assignedPickers: [], 
+        assignedPickers: window.assignedPickersData || [], 
         modalPickers: [],    
         
         changeStatus(newStatus) {
+            // Candado: Si ya está completado, no permitimos cambiar de estado
+            if (this.status === 'COMPLETADO') return;
+
             if (newStatus === 'COMPLETADO') {
                 this.showStatusDropdown = false;
                 if (!this.isPaid) {
@@ -51,9 +55,36 @@
         executeCompletion() {
             this.status = 'COMPLETADO';
             this.showCompletionConfirm = false;
+
+            const payload = {
+                ticket_id: {{ $ticket->id }}
+            };
+
+            fetch('/ticket/complete-ticket', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': window.csrfToken
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Ticket completado en BD:', data);
+                    this.status = data.status_tarea;
+                }
+            })
+            .catch(error => {
+                console.error('Error al completar el ticket:', error);
+            });
         },
         
         openModal() {
+            // Candado: Si está COMPLETADO, bloqueamos la apertura del modal de pickers
+            if (this.status === 'COMPLETADO') return;
+
             this.modalPickers = [...this.assignedPickers];
             this.showPickerModal = true;
         },
@@ -67,6 +98,32 @@
             else if (this.assignedPickers.length === 0 && this.status === 'PREPARANDO') {
                 this.status = 'PENDIENTE';
             }
+
+            const payload = {
+                ticket_id: {{ $ticket->id }},
+                pickers: this.assignedPickers.map(picker => picker.id),
+                status: this.status
+            };
+
+            fetch('/ticket/update-pickers', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': window.csrfToken
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Sincronizado correctamente en BD:', data);
+                    this.status = data.status_tarea;
+                }
+            })
+            .catch(error => {
+                console.error('Error al actualizar pickers:', error);
+            });
         },
         
         addPickerToModal(picker) {
@@ -98,65 +155,19 @@
                 <div class="flex flex-wrap justify-between items-start gap-4">
                     <div class="flex items-start gap-4">
                         <div>
-                            <p class="text-[11px] text-white/35 uppercase tracking-widest mb-1">Documento de Venta</p>
+                            <p class="text-[11px] text-white/35 uppercase tracking-widest mb-1">Número de Ticket</p>
                             <h1 class="text-xl font-semibold text-white tracking-tight">#{{ $ticket->ticket_number }}</h1>
                         </div>
 
-                        {{-- Badge Tributario --}}
-                        <div class="flex items-center gap-2 bg-white/[0.02] border border-white/[0.06] rounded-xl px-3 py-2 mt-1">
-                            <i data-lucide="file-text" class="w-5 h-5 text-purple-400" style="stroke-width:1.5"></i>
-                            <div class="leading-none">
-                                <span class="text-xs font-medium text-white/80 block">{{ $ticket->document_type ?? 'Boleta' }}</span>
-                                <span class="text-[10px] text-white/35 font-mono block mt-1">#{{ $ticket->document_number ?? '124850' }}</span>
-                            </div>
-                        </div>
+                        {{-- Badge Boleta --}}
+                        <x-tickets.receipt-badge :ticket="$ticket" />
 
                         {{-- Badge Estado de Pago --}}
-                        <div class="mt-1">
-                            <div x-show="isPaid" class="flex items-center gap-2 bg-emerald-500/5 border border-emerald-500/20 rounded-xl px-3 py-2">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                                <span class="text-xs font-medium text-emerald-400">Pagado</span>
-                            </div>
-                            <div x-show="!isPaid" class="flex items-center gap-2 bg-rose-500/5 border border-rose-500/20 rounded-xl px-3 py-2" style="display: none;">
-                                <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
-                                <span class="text-xs font-medium text-rose-400">No Pagado</span>
-                            </div>
-                        </div>
+                        <x-tickets.paid-badge :ticket="$ticket" />
                     </div>
                     
                     {{-- Dropdown de Estados --}}
-                    <div class="relative">
-                        <button @click="showStatusDropdown = !showStatusDropdown" 
-                                @click.away="showStatusDropdown = false"
-                                class="flex items-center justify-between w-36 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors"
-                                :class="{
-                                    'bg-amber-500/10 border-amber-500/30 text-amber-400': status === 'PENDIENTE',
-                                    'bg-blue-500/10 border-blue-500/30 text-blue-400': status === 'PREPARANDO',
-                                    'bg-emerald-500/10 border-emerald-500/30 text-emerald-400': status === 'COMPLETADO'
-                                }">
-                            <div class="flex items-center gap-2">
-                                <span class="w-1.5 h-1.5 rounded-full"
-                                      :class="{
-                                          'bg-amber-400 animate-pulse': status === 'PENDIENTE',
-                                          'bg-blue-400 animate-pulse': status === 'PREPARANDO',
-                                          'bg-emerald-400': status === 'COMPLETADO'
-                                      }"></span>
-                                <span x-text="status"></span>
-                            </div>
-                            <i data-lucide="chevron-down" class="w-3.5 h-3.5 opacity-60" style="stroke-width:2"></i>
-                        </button>
-
-                        <div x-show="showStatusDropdown" 
-                             x-transition:enter="transition ease-out duration-100"
-                             x-transition:enter-start="transform opacity-0 scale-95"
-                             x-transition:enter-end="transform opacity-100 scale-100"
-                             class="absolute right-0 mt-2 w-36 rounded-xl bg-zinc-950 border border-white/[0.08] shadow-2xl p-1 z-50"
-                             style="display: none;">
-                            <button @click="changeStatus('PENDIENTE')" class="w-full text-left px-3 py-2 rounded-lg text-xs text-amber-400 hover:bg-white/[0.03] transition-colors">Pendiente</button>
-                            <button @click="changeStatus('PREPARANDO')" class="w-full text-left px-3 py-2 rounded-lg text-xs text-blue-400 hover:bg-white/[0.03] transition-colors">Preparando</button>
-                            <button @click="changeStatus('COMPLETADO')" class="w-full text-left px-3 py-2 rounded-lg text-xs text-emerald-400 hover:bg-white/[0.03] transition-colors">Completado</button>
-                        </div>
-                    </div>
+                    <x-tickets.state-button :ticket="$ticket" />
                 </div>
 
                 {{-- Detalles Inferiores Originales --}}
@@ -191,15 +202,16 @@
                     </div>
                     
                     <button @click="openModal()" 
+                            :disabled="status === 'COMPLETADO'"
                             class="p-2 rounded-xl border transition-all flex items-center justify-center"
-                            :class="assignedPickers.length === 0 ? 'bg-white/[0.02] border-white/[0.06] text-white/20' : 'bg-purple-500/10 border-purple-500/30 text-purple-400'">
+                            :class="status === 'COMPLETADO' ? 'bg-white/[0.02] border-white/[0.04] text-white/15 cursor-not-allowed' : (assignedPickers.length === 0 ? 'bg-white/[0.02] border-white/[0.06] text-white/20' : 'bg-purple-500/10 border-purple-500/30 text-purple-400')">
                         <i data-lucide="user" x-show="assignedPickers.length === 0" class="w-5 h-5" style="stroke-width:1.5"></i>
                         <i data-lucide="user-check" x-show="assignedPickers.length === 1" class="w-5 h-5" style="stroke-width:1.5" style="display: none;"></i>
                         <i data-lucide="users" x-show="assignedPickers.length > 1" class="w-5 h-5" style="stroke-width:1.5" style="display: none;"></i>
                     </button>
                 </div>
 
-                {{-- Tags Exteriores Limpios (Sin Números ni X) --}}
+                {{-- Tags Exteriores --}}
                 <div class="flex flex-wrap gap-1.5 mt-2">
                     <template x-if="assignedPickers.length === 0">
                         <span class="text-xs text-white/25 italic py-1">Sin personal asignado</span>
@@ -214,15 +226,14 @@
 
         </div>
 
-        {{-- MODAL ASIGNAR PICKERS CON SCROLL INTERNO Y CONTROL DE TEXTO LARGO --}}
+        {{-- MODAL ASIGNAR PICKERS --}}
         <div x-show="showPickerModal" class="fixed inset-0 z-50 flex justify-end" style="display: none;" role="dialog" aria-modal="true">
-            <div x-show="showPickerModal" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200" class="fixed inset-0 bg-black/60 backdrop-blur-sm" @click="showPickerModal = false"></div>
+            <div x-show="showPickerModal" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" class="fixed inset-0 bg-black/60 backdrop-blur-sm" @click="showPickerModal = false"></div>
             
             <div x-show="showPickerModal" 
                  x-transition:enter="transition ease-out duration-300 transform" 
                  x-transition:enter-start="translate-x-full" 
                  x-transition:enter-end="translate-x-0" 
-                 x-transition:leave="transition ease-in duration-200 transform" 
                  class="relative w-full max-w-md h-full bg-zinc-950 border-l border-white/[0.08] shadow-2xl flex flex-col text-white z-50 pb-20 md:pb-0 overflow-hidden">
                 
                 {{-- Cabecera Fija --}}
@@ -237,7 +248,7 @@
                 {{-- Cuerpo del Modal con Scroll Único --}}
                 <div class="flex-1 overflow-y-auto p-4 flex flex-col md:flex-row gap-4 mb-6 md:mb-0 custom-scrollbar">
                     
-                    {{-- LADO IZQUIERDO: Disponibles (Con Blindaje Antideforme) --}}
+                    {{-- LADO IZQUIERDO: Disponibles --}}
                     <div class="flex-1 min-w-0">
                         <p class="text-[10px] text-white/35 uppercase tracking-widest font-semibold mb-2 sticky top-0 bg-zinc-950 py-1 z-10">Disponibles</p>
                         <div class="space-y-1.5">
@@ -246,10 +257,8 @@
                                         class="w-full flex items-center justify-between text-left p-2.5 rounded-xl border text-xs transition-all gap-3 min-w-0" 
                                         :class="modalPickers.find(p => p.id === picker.id) ? 'bg-zinc-900 border-white/[0.02] text-white/20 cursor-not-allowed' : 'bg-white/[0.02] border-white/[0.05] hover:border-white/[0.15] text-white/80 hover:bg-white/[0.04]'">
                                     
-                                    {{-- Contenedor del nombre blindado contra dos líneas --}}
                                     <span class="truncate whitespace-nowrap flex-1 min-w-0" x-text="picker.display_name"></span>
                                     
-                                    {{-- Indicador estético pasivo temporal --}}
                                     <span class="flex items-center justify-center shrink-0 w-5 h-5 rounded-full text-[10px] font-bold font-mono tracking-tighter bg-white/[0.03] text-white/40 border border-white/[0.06]">
                                         0
                                     </span>
@@ -286,13 +295,12 @@
 
         {{-- MODAL 1: AVISO PAGO PENDIENTE --}}
         <div x-show="showPaymentAlert" class="fixed inset-0 z-[100] flex items-center justify-center p-4" style="display: none;" role="dialog" aria-modal="true">
-            <div x-show="showPaymentAlert" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" class="fixed inset-0 bg-black/70 backdrop-blur-md" @click="showPaymentAlert = false"></div>
+            <div x-show="showPaymentAlert" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" class="fixed inset-0 bg-black/70 backdrop-blur-md" @click="showPaymentAlert = false"></div>
             
             <div x-show="showPaymentAlert" 
                  x-transition:enter="transition ease-out duration-200 transform" 
                  x-transition:enter-start="opacity-0 scale-95" 
                  x-transition:enter-end="opacity-100 scale-100" 
-                 x-transition:leave="transition ease-in duration-150 transform" 
                  class="relative w-full max-w-sm bg-zinc-900 border border-white/[0.08] rounded-2xl p-6 text-center shadow-2xl z-50">
                 
                 <div class="mx-auto flex items-center justify-center h-14 w-14 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 mb-4">
@@ -310,13 +318,12 @@
 
         {{-- MODAL 2: CONFIRMACIÓN PASO CRÍTICO A COMPLETADO --}}
         <div x-show="showCompletionConfirm" class="fixed inset-0 z-[100] flex items-center justify-center p-4" style="display: none;" role="dialog" aria-modal="true">
-            <div x-show="showCompletionConfirm" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" class="fixed inset-0 bg-black/70 backdrop-blur-md" @click="showCompletionConfirm = false"></div>
+            <div x-show="showCompletionConfirm" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" class="fixed inset-0 bg-black/70 backdrop-blur-md" @click="showCompletionConfirm = false"></div>
             
             <div x-show="showCompletionConfirm" 
                  x-transition:enter="transition ease-out duration-200 transform" 
                  x-transition:enter-start="opacity-0 scale-95" 
                  x-transition:enter-end="opacity-100 scale-100" 
-                 x-transition:leave="transition ease-in duration-150 transform" 
                  class="relative w-full max-w-sm bg-zinc-900 border border-white/[0.08] rounded-2xl p-6 text-center shadow-2xl z-50">
                 
                 <div class="mx-auto flex items-center justify-center h-14 w-14 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 mb-4">
@@ -333,7 +340,7 @@
             </div>
         </div>
 
-    </div> {{-- Cierre de x-data --}}
+    </div>
 
     {{-- GRILLA DE PRODUCTOS --}}
     <x-tickets.product-grid :items="$ticket->items" />

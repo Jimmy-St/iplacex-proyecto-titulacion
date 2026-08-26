@@ -8,6 +8,7 @@ use App\Http\Controllers\ProductosController;
 use App\Http\Controllers\ReportesController;
 use App\Http\Controllers\ConfigController;
 
+use App\Http\Controllers\DemoController;
 
 // Rutas de invitados (Si ya estás logueado, te saca del login y te manda a los tickets)
 Route::middleware('guest')->group(function () {
@@ -30,10 +31,11 @@ Route::middleware('auth')->group(function () {
     // Tickets — vistas web
     Route::get('/tickets',         [TicketController::class, 'index'])->name('tickets.index');
     Route::get('/ticket/{numero}', [TicketController::class, 'show'])->name('tickets.show');
-    //Volt::route('/ticket/{numero}', 'ticket-detail')->name('tickets.show');
-    //Volt::route('/ticket/{numero}', 'ticket-detail')->name('tickets.show');
-    //Volt::route('/ticket/{numero}', 'demo')->name('tickets.show');
-    //Volt::route('/demo/{numero}', 'demo')->name('demo.show');
+
+    //Actualiza Pickers por Ticket
+    //TODO: Habilitar una vez probado 
+    //Route::post('/ticket/update-pickers', [TicketController::class, 'updatePickers'])->name('ticket.update-pickers');
+
     // Pickers — CRUD completo
     Route::resource('pickers', PickerController::class);
 
@@ -42,3 +44,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/reportes',  [ReportesController::class,  'index'])->name('reportes.index');
     Route::get('/config',    [ConfigController::class,    'index'])->name('config.index');
 });
+
+// TODO: Quitar de acá, pasar a AUTENTICACION
+Route::post('/ticket/update-pickers', [TicketController::class, 'updatePickers'])->name('ticket.update-pickers');
+Route::post('/ticket/complete-ticket', [TicketController::class, 'completeTicket'])->name('ticket.complete');
