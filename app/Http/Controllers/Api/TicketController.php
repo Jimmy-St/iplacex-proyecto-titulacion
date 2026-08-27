@@ -17,6 +17,33 @@ class TicketController extends Controller
     // Para pantalla
     public function latest()
     {
+        $tickets = DB::table('picking_tasks as pt')
+            ->join('tickets as t', 't.id', '=', 'pt.ticket_id')
+            ->select([
+                't.ticket_number',
+                't.customer',
+                'pt.status',
+                DB::raw("COALESCE((
+                    SELECT p.display_name 
+                    FROM picking_assignments pa 
+                    JOIN pickers p ON p.id = pa.picker_id 
+                    WHERE pa.picking_task_id = pt.id 
+                    ORDER BY pa.id ASC 
+                    LIMIT 1
+                ), 'Sin asignar') as picker")
+            ])
+            ->orderByDesc('pt.updated_at')
+            ->limit(12)
+            ->get();
+
+        return response()->json([
+            'message' => 'Últimos 12 tickets.',
+            'count'   => $tickets->count(),
+            'tickets' => $tickets,
+        ], 200);
+    }
+    public function latest2()
+    {
         $tickets = Ticket::orderBy('id', 'desc')
             ->take(12)
             ->get();
