@@ -95,7 +95,7 @@ class TicketController extends Controller
 
             // AGREGAMOS TAREA
             $ticket->pickingTask()->create([
-                'status' => 'pending', // Estado inicial por defecto
+                'status' => 'PENDIENTE', // Estado inicial por defecto
             ]);
 
             // ==========================================
