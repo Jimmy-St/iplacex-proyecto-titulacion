@@ -25,7 +25,7 @@
         <div class="shrink-0 grid grid-cols-[2.5fr_1fr_1.1fr_0.5fr] items-center py-[0.6vh] px-[2vw] border-b border-slate-700">
             <span class="text-slate-400 font-bold tracking-wider text-[2.4vh]">CLIENTE</span>
             <span class="text-slate-400 font-bold tracking-wider text-[2.4vh]">TICKET</span>
-            <span class="text-slate-400 font-bold tracking-wider text-[2.4vh]">VENDEDOR</span>
+            <span class="text-slate-400 font-bold tracking-wider text-[2.4vh]">PICKER</span>
             <div class="flex justify-end gap-[0.8vw] text-slate-400 text-[2.6vh]">
                 <span>&#9664;</span>
                 <span>&#9654;</span>
@@ -44,8 +44,9 @@
                     <span class="text-amber-50 font-extrabold text-[3.2vh] truncate pr-[1vw] uppercase" x-text="pedido.picker"></span>
                     <div class="flex justify-end">
                         <span
-                            class="bg-green-600 text-white uppercase font-bold text-[1.5vh] px-[1vw] py-[0.5vh] rounded-md whitespace-nowrap"
-                            x-text="badgeLabels[pedido.estado] ?? pedido.estado"
+                            class="uppercase font-bold text-[1.5vh] px-[1vw] py-[0.5vh] rounded-md whitespace-nowrap min-w-[120px] text-center"
+                            :class="getStatusConfig(pedido.estado).class"
+                            x-text="getStatusConfig(pedido.estado).label"
                         ></span>
                     </div>
                 </div>
@@ -58,10 +59,25 @@
         document.addEventListener('alpine:init', () => {
             Alpine.data('pedidosApp', () => ({
                 pedidos: [],
-                badgeLabels: {
-                    PEND: 'PEND.',
-                    PROG: 'PROG.',
-                    COMP: 'COMP.',
+                statusMap: {
+                    'pending': { label: 'PENDIENTE', class: 'bg-amber-500 text-slate-950 font-black' },
+                    'pendiente': { label: 'PENDIENTE', class: 'bg-amber-500 text-slate-950 font-black' },
+                    'pend': { label: 'PENDIENTE', class: 'bg-amber-500 text-slate-950 font-black' },
+                    
+                    'in_progress': { label: 'PREPARANDO', class: 'bg-blue-600 text-white' },
+                    'preparando': { label: 'PREPARANDO', class: 'bg-blue-600 text-white' },
+                    'prog': { label: 'PREPARANDO', class: 'bg-blue-600 text-white' },
+                    
+                    'completed': { label: 'COMPLETADO', class: 'bg-emerald-600 text-white' },
+                    'completado': { label: 'COMPLETADO', class: 'bg-emerald-600 text-white' },
+                    'comp': { label: 'COMPLETADO', class: 'bg-emerald-600 text-white' }
+                },
+                getStatusConfig(status) {
+                    const key = String(status || '').toLowerCase().trim();
+                    return this.statusMap[key] || { 
+                        label: (status || 'PENDIENTE').toUpperCase(), 
+                        class: 'bg-amber-500 text-slate-950 font-black' 
+                    };
                 },
                 async fetchPedidos() {
                     try {
@@ -78,8 +94,8 @@
                             this.pedidos = lista.map(item => ({
                                 cliente: item.customer || 'SIN CLIENTE',
                                 ticket: item.ticket_number || item.id,
-                                picker: item.seller || 'SIN ASIGNAR',
-                                estado: item.status || 'PEND'
+                                picker: item.picker || item.seller || 'SIN ASIGNAR',
+                                estado: item.status || 'pending'
                             }));
                         }
                     } catch (e) {
