@@ -37,8 +37,12 @@ class TicketController extends Controller
             ->where('ticket_number', $ticket_number)
             ->first();
 
-        // 2. Traemos todos los pickers disponibles para el modal
-        $pickers = Picker::orderBy('first_name', 'asc')->get();
+        // 2. Traemos todos los pickers disponibles con el conteo de sus tareas activas en curso
+        $pickers = Picker::withCount(['pickingTasks as active_tasks_count' => function ($query) {
+            $query->whereIn('status', ['PENDIENTE', 'PREPARANDO']);
+        }])
+            ->orderBy('first_name', 'asc')
+            ->get();
 
         return view('tickets.show', compact('ticket', 'pickers'));
     }
