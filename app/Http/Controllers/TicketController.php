@@ -78,6 +78,7 @@ class TicketController extends Controller
             'status_tarea' => $status
         ]);
     }
+    // Endpoint Web
     public function completeTicket(Request $request)
     {
         $ticketId = $request->input('ticket_id');
