@@ -40,4 +40,4 @@ Route::put('/ticket/{ticket_number}', [TicketController::class, 'update']);
 
 // TICKETS NUEVOS
 Route::get('/ticket/latest', [TicketController::class, 'latest']);
-Route::get('/picker/latest', [TicketController::class, 'latest']);
+Route::get('/picker/latest', [TicketController::class, 'pickerActivityLatest']);

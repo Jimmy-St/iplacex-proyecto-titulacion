@@ -17,37 +17,24 @@ class TicketController extends Controller
     // PANTALLA PICKERS
     public function pickerActivityLatest()
     {
-        // Obtenemos las 12 asignaciones y tareas más recientes unidas con tickets y pickers
-        $rows = DB::table('picking_assignments as pa')
+        $tickets = DB::table('picking_assignments as pa')
+            ->join('pickers as p', 'p.id', '=', 'pa.picker_id')
             ->join('picking_tasks as pt', 'pt.id', '=', 'pa.picking_task_id')
             ->join('tickets as t', 't.id', '=', 'pt.ticket_id')
-            ->join('pickers as p', 'p.id', '=', 'pa.picker_id')
             ->select([
-                'p.display_name',
-                'p.first_name',
-                'p.last_name',
                 't.ticket_number',
+                't.customer',
                 'pt.status',
-                'pt.updated_at'
+                'p.display_name as picker'
             ])
-            ->orderByDesc('pt.updated_at')
+            ->orderByDesc('pa.id') // Tomamos las asignaciones más recientes
             ->limit(12)
             ->get();
 
-        $listado = $rows->map(function ($item) {
-            $pickerName = $item->display_name ?: trim(($item->first_name ?? '') . ' ' . ($item->last_name ?? ''));
-
-            return [
-                'picker' => strtoupper($pickerName ?: 'SIN ASIGNAR'),
-                'ticket' => $item->ticket_number,
-                'estado' => $item->status ?? 'pending'
-            ];
-        });
-
         return response()->json([
-            'message' => 'Últimas 12 actividades de pickers.',
-            'count'   => $listado->count(),
-            'listado' => $listado,
+            'message' => 'Últimas 12 asignaciones de pickers.',
+            'count'   => $tickets->count(),
+            'tickets' => $tickets,
         ], 200);
     }
 
