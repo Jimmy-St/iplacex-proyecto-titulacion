@@ -13,56 +13,56 @@ class ReportesController extends Controller
 {
     public function index(Request $request)
     {
-        // 1. Capturar la fecha del request o usar la de hoy por defecto
+        // 1. Fecha seleccionada (o hoy por defecto)
         $fecha = $request->input('fecha', date('Y-m-d'));
 
-        // 2. KPIs Globales usando filtros de fecha nativos robustos
+        // 2. Total de tickets creados en la fecha
         $totalTickets = Ticket::whereDate('created_at', $fecha)->count();
 
-        $tareasDia = PickingTask::whereDate('created_at', $fecha)->get();
+        // 3. Tareas pendientes creadas en la fecha
+        $pendientes = PickingTask::whereDate('created_at', $fecha)
+            ->where('status', '!=', 'COMPLETADO')
+            ->count();
 
-        $pendientes = $tareasDia->where('status', '!=', 'COMPLETADO')->count();
-        $completados = $tareasDia->where('status', 'COMPLETADO')->count();
+        // 4. Tareas completadas en la fecha (según su fecha de actualización/cierre)
+        $completados = PickingTask::whereDate('updated_at', $fecha)
+            ->where('status', 'COMPLETADO')
+            ->count();
 
-        // 3. Tiempo Promedio de Ciclo (en minutos) para tareas COMPLETADAS en la fecha
-        $tareasCompletadas = PickingTask::where('status', 'COMPLETADO')
+        // 5. Tiempo promedio de ciclo para las tareas completadas hoy
+        $tareasCompletadasHoy = PickingTask::where('status', 'COMPLETADO')
             ->whereDate('updated_at', $fecha)
             ->get();
 
-        $tiempoTotalMinutos = 0;
-        $cantidadConTiempo = 0;
+        $minutosTotales = 0;
+        $conteoTiempo = 0;
 
-        foreach ($tareasCompletadas as $tarea) {
+        foreach ($tareasCompletadasHoy as $tarea) {
             if ($tarea->created_at && $tarea->updated_at) {
-                $minutos = Carbon::parse($tarea->created_at)->diffInMinutes(Carbon::parse($tarea->updated_at));
-                $tiempoTotalMinutos += $minutos;
-                $cantidadConTiempo++;
+                $minutosTotales += Carbon::parse($tarea->created_at)->diffInMinutes(Carbon::parse($tarea->updated_at));
+                $conteoTiempo++;
             }
         }
 
-        $tiempoPromedioCiclo = $cantidadConTiempo > 0
-            ? round($tiempoTotalMinutos / $cantidadConTiempo, 1)
-            : 0;
+        $tiempoPromedioCiclo = $conteoTiempo > 0 ? round($minutosTotales / $conteoTiempo, 1) : 0;
 
-        // 4. Desempeño por Picker
+        // 6. Rendimiento por Picker con consultas limpias y separadas
         $pickers = Picker::all();
+        $rendimientoPickers = [];
 
-        // Pasamos explícitamente $fecha dentro del use() para que la closure la reconozca sin errores
-        $rendimientoPickers = $pickers->map(function ($picker) use ($fecha) {
+        foreach ($pickers as $picker) {
+            // Buscar los IDs de tareas asignadas a este picker
+            $taskIds = DB::table('picking_assignments')
+                ->where('picker_id', $picker->id)
+                ->pluck('picking_task_id');
 
-            $asignaciones = DB::table('picking_assignments')
-                ->join('picking_tasks', 'picking_assignments.picking_task_id', '=', 'picking_tasks.id')
-                ->where('picking_assignments.picker_id', $picker->id)
-                ->select('picking_tasks.*')
+            // Tareas completadas por este picker en la fecha seleccionada
+            $completadasPicker = PickingTask::whereIn('id', $taskIds)
+                ->where('status', 'COMPLETADO')
+                ->whereDate('updated_at', $fecha)
                 ->get();
 
-            // Filtrar tareas completadas en la fecha seleccionada
-            $completadasPicker = $asignaciones->filter(function ($task) use ($fecha) {
-                $fechaActualizacion = $task->updated_at ? Carbon::parse($task->updated_at)->toDateString() : null;
-                return $task->status === 'COMPLETADO' && $fechaActualizacion === $fecha;
-            });
-
-            // Tiempo promedio individual del picker
+            // Calcular tiempo promedio individual
             $tMinutos = 0;
             $tCount = 0;
             foreach ($completadasPicker as $task) {
@@ -73,9 +73,12 @@ class ReportesController extends Controller
             }
             $promedioPicker = $tCount > 0 ? round($tMinutos / $tCount, 1) : 0;
 
-            // Carga actual (tareas que NO están completadas)
-            $cargaActual = $asignaciones->where('status', '!=', 'COMPLETADO')->count();
+            // Carga actual (tareas asignadas que NO están completadas)
+            $cargaActual = PickingTask::whereIn('id', $taskIds)
+                ->where('status', '!=', 'COMPLETADO')
+                ->count();
 
+            // Definir estado visual
             if ($cargaActual > 0) {
                 $badgeEstado = "EN PICKING ({$cargaActual})";
                 $badgeClase = "bg-rose-500/15 text-rose-400 border-rose-500/25";
@@ -84,7 +87,7 @@ class ReportesController extends Controller
                 $badgeClase = "bg-emerald-500/15 text-emerald-400 border-emerald-500/25";
             }
 
-            return [
+            $rendimientoPickers[] = [
                 'display_name' => $picker->display_name ?? ($picker->first_name . ' ' . $picker->last_name),
                 'employee_code' => $picker->employee_code,
                 'zone_assigned' => $picker->zone_assigned ?? 'General',
@@ -93,7 +96,7 @@ class ReportesController extends Controller
                 'badge_estado' => $badgeEstado,
                 'badge_clase' => $badgeClase,
             ];
-        });
+        }
 
         return view('reportes.index', compact(
             'fecha',
