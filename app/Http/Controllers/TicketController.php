@@ -2,107 +2,91 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Seller;
-use App\Models\Ticket;
 use App\Models\Picker;
-use App\Models\PickingTask;
-use App\Models\PickingAssignment;
-
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
+use App\Http\Requests\StorePickerRequest;
+use App\Http\Requests\UpdatePickerRequest;
 use Illuminate\Http\Request;
-use Throwable;
 
-use App\Http\Requests\TicketRequest;
-
-class TicketController extends Controller
+class PickerController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $fecha  = request('fecha', date('Y-m-d'));
-        $buscar = request('buscar');
+        $search = $request->input('search');
 
-        $tickets = Ticket::whereDate('created_at', $fecha)
-            ->when($buscar, fn($q) => $q->where('ticket_number', 'LIKE', "%{$buscar}%"))
+        $pickers = Picker::query()
+            ->withCount(['pickingTasks as active_tasks_count' => function ($query) {
+                $query->whereIn('status', ['PENDIENTE', 'PREPARANDO']);
+            }])
+            ->when($search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('first_name', 'like', "%{$search}%")
+                        ->orWhere('last_name', 'like', "%{$search}%")
+                        ->orWhere('display_name', 'like', "%{$search}%")
+                        ->orWhere('employee_code', 'like', "%{$search}%");
+                });
+            })
             ->latest()
-            ->get();
+            ->paginate(15)
+            ->withQueryString();
 
-        return view('tickets.index', compact('tickets', 'fecha'));
+        return view('pickers.index', compact('pickers', 'search'));
     }
 
-    public function show($ticket_number)
+    public function show(Picker $picker)
     {
-        // 1. Buscamos el ticket cargando sus items, la tarea de picking y los pickers asociados a esa tarea
-        $ticket = Ticket::with(['items', 'pickingTask.pickers'])
-            ->where('ticket_number', $ticket_number)
-            ->first();
-
-        // 2. Traemos todos los pickers disponibles con el conteo de sus tareas activas en curso
-        $pickers = Picker::withCount(['pickingTasks as active_tasks_count' => function ($query) {
+        // 1. Calculamos sus tareas activas actuales para los badges
+        $picker->loadCount(['pickingTasks as active_tasks_count' => function ($query) {
             $query->whereIn('status', ['PENDIENTE', 'PREPARANDO']);
-        }])
-            ->orderBy('first_name', 'asc')
-            ->get();
+        }]);
 
-        return view('tickets.show', compact('ticket', 'pickers'));
+        // 2. Historial paginado de tareas y tickets asociados, del más reciente al más antiguo
+        $assignedTasks = $picker->pickingTasks()
+            ->with('ticket')
+            ->latest('picking_assignments.created_at')
+            ->paginate(10);
+
+        return view('pickers.show', compact('picker', 'assignedTasks'));
     }
 
-    // actualiza Pickers en Ticket
-    public function updatePickers(Request $request)
+    public function create()
     {
-        // 1. Recibimos los datos del JSON
-        $ticketId = $request->input('ticket_id');
-        $pickerIds = $request->input('pickers', []); // Ej: [1, 2, 3] o []
-
-        // 2. Calculamos el estado según la cantidad de pickers
-        $status = empty($pickerIds) ? 'PENDIENTE' : 'PREPARANDO';
-
-        // 3. Verificamos que el ticket exista
-        $ticket = Ticket::findOrFail($ticketId);
-
-        // 4. Buscamos la tarea asociada o la creamos al vuelo si no existe (para tickets antiguos)
-        $task = PickingTask::firstOrCreate(
-            ['ticket_id' => $ticket->id],
-            ['status' => 'PENDIENTE'] // Estado inicial por defecto si se crea nueva
-        );
-
-        // 5. Sincronizamos los pickers en la tabla pivote
-        $task->pickers()->sync($pickerIds);
-
-        // 6. Actualizamos el estado de la tarea
-        $task->update(['status' => $status]);
-
-        // 7. Retornamos la respuesta confirmando el éxito
-        return response()->json([
-            'success' => true,
-            'message' => 'Pickers y estado de la tarea actualizados correctamente',
-            'ticket_id' => $ticket->id,
-            'picking_task_id' => $task->id,
-            'pickers_sincronizados' => $pickerIds,
-            'status_tarea' => $status
+        return view('pickers.create', [
+            'picker' => new Picker(['is_active' => true, 'status' => 'active']),
         ]);
     }
-    // Endpoint Web
-    public function completeTicket(Request $request)
+
+    public function store(StorePickerRequest $request)
     {
-        $ticketId = $request->input('ticket_id');
+        $data = $request->validated();
+        $data['is_active'] = $request->boolean('is_active');
 
-        // 1. Verificamos que el ticket exista
-        $ticket = Ticket::findOrFail($ticketId);
+        Picker::create($data);
 
-        // 2. Buscamos la tarea de picking asociada
-        $task = PickingTask::where('ticket_id', $ticket->id)->firstOrFail();
+        return redirect()->route('pickers.index')
+            ->with('success', 'Picker creado correctamente.');
+    }
 
-        // 3. Actualizamos el estado a COMPLETADO
-        $task->update(['status' => 'COMPLETADO']);
+    public function edit(Picker $picker)
+    {
+        return view('pickers.edit', compact('picker'));
+    }
 
-        // 4. Retornamos la respuesta de éxito
-        return response()->json([
-            'success' => true,
-            'message' => 'Ticket y tarea de picking completados exitosamente',
-            'ticket_id' => $ticket->id,
-            'picking_task_id' => $task->id,
-            'status_tarea' => 'COMPLETADO'
-        ]);
+    public function update(UpdatePickerRequest $request, Picker $picker)
+    {
+        $data = $request->validated();
+        $data['is_active'] = $request->boolean('is_active');
+
+        $picker->update($data);
+
+        return redirect()->route('pickers.index')
+            ->with('success', 'Picker actualizado con éxito.');
+    }
+
+    public function destroy(Picker $picker)
+    {
+        $picker->delete();
+
+        return redirect()->route('pickers.index')
+            ->with('success', 'Picker eliminado del sistema.');
     }
 }

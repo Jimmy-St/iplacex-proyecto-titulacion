@@ -40,7 +40,7 @@
     <div class="col-span-2">CÓDIGO</div>
     <div class="col-span-4">NOMBRE</div>
     <div class="col-span-2">ZONA</div>
-    <div class="col-span-2 text-center">ESTADO</div>
+    <div class="col-span-2 text-center">ESTADO ACTUAL</div>
     <div class="col-span-2 text-right">ACCIONES</div>
   </div>
 
@@ -68,13 +68,10 @@
             <span class="inline-block px-2.5 py-0.5 text-[10px] font-bold tracking-wider bg-red-500/15 text-red-400 border border-red-500/25 rounded-md">
               INACTIVO
             </span>
-          @elseif($picker->status === 'busy')
-            <span class="inline-block px-2.5 py-0.5 text-[10px] font-bold tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/25 rounded-md">
-              EN PICKING
-            </span>
           @else
-            <span class="inline-block px-2.5 py-0.5 text-[10px] font-bold tracking-wider bg-green-500/15 text-green-400 border border-green-500/25 rounded-md">
-              ACTIVO
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[10px] font-bold tracking-wider border rounded-md {{ $picker->active_tasks_count > 0 ? 'bg-rose-500/15 text-rose-400 border-rose-500/25' : 'bg-emerald-500/15 text-emerald-400 border-emerald-500/25' }}">
+              <span class="w-1.5 h-1.5 rounded-full {{ $picker->active_tasks_count > 0 ? 'bg-rose-400 animate-pulse' : 'bg-emerald-400' }}"></span>
+              {{ $picker->active_tasks_count > 0 ? "EN PICKING ({$picker->active_tasks_count})" : 'LIBRE (0)' }}
             </span>
           @endif
         </div>
