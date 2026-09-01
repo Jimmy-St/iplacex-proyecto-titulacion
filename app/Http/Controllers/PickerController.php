@@ -26,7 +26,7 @@ class PickerController extends Controller
                 });
             })
             ->latest()
-            ->paginate(15)
+            ->paginate(20)
             ->withQueryString();
 
         return view('pickers.index', compact('pickers', 'search'));
@@ -43,7 +43,7 @@ class PickerController extends Controller
         $assignedTasks = $picker->pickingTasks()
             ->with('ticket')
             ->latest('picking_assignments.created_at')
-            ->paginate(10);
+            ->paginate(20);
 
         return view('pickers.show', compact('picker', 'assignedTasks'));
     }
