@@ -14,6 +14,9 @@ class PickerController extends Controller
         $search = $request->input('search');
 
         $pickers = Picker::query()
+            ->withCount(['pickingTasks as active_tasks_count' => function ($query) {
+                $query->whereIn('status', ['PENDIENTE', 'PREPARANDO']);
+            }])
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('first_name', 'like', "%{$search}%")
@@ -31,7 +34,18 @@ class PickerController extends Controller
 
     public function show(Picker $picker)
     {
-        return view('pickers.show', compact('picker'));
+        // 1. Calculamos sus tareas activas actuales para los badges
+        $picker->loadCount(['pickingTasks as active_tasks_count' => function ($query) {
+            $query->whereIn('status', ['PENDIENTE', 'PREPARANDO']);
+        }]);
+
+        // 2. Historial paginado de tareas y tickets asociados, del más reciente al más antiguo
+        $assignedTasks = $picker->pickingTasks()
+            ->with('ticket')
+            ->latest('picking_assignments.created_at')
+            ->paginate(10);
+
+        return view('pickers.show', compact('picker', 'assignedTasks'));
     }
 
     public function create()
@@ -70,7 +84,7 @@ class PickerController extends Controller
 
     public function destroy(Picker $picker)
     {
-        $picker->delete(); // Soft delete automático
+        $picker->delete();
 
         return redirect()->route('pickers.index')
             ->with('success', 'Picker eliminado del sistema.');
