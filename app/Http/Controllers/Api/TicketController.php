@@ -14,7 +14,44 @@ use Illuminate\Http\Request;
 
 class TicketController extends Controller
 {
-    // Para pantalla
+    // PANTALLA PICKERS
+    public function pickerActivityLatest()
+    {
+        // Obtenemos las 12 asignaciones y tareas más recientes unidas con tickets y pickers
+        $rows = DB::table('picking_assignments as pa')
+            ->join('picking_tasks as pt', 'pt.id', '=', 'pa.picking_task_id')
+            ->join('tickets as t', 't.id', '=', 'pt.ticket_id')
+            ->join('pickers as p', 'p.id', '=', 'pa.picker_id')
+            ->select([
+                'p.display_name',
+                'p.first_name',
+                'p.last_name',
+                't.ticket_number',
+                'pt.status',
+                'pt.updated_at'
+            ])
+            ->orderByDesc('pt.updated_at')
+            ->limit(12)
+            ->get();
+
+        $listado = $rows->map(function ($item) {
+            $pickerName = $item->display_name ?: trim(($item->first_name ?? '') . ' ' . ($item->last_name ?? ''));
+
+            return [
+                'picker' => strtoupper($pickerName ?: 'SIN ASIGNAR'),
+                'ticket' => $item->ticket_number,
+                'estado' => $item->status ?? 'pending'
+            ];
+        });
+
+        return response()->json([
+            'message' => 'Últimas 12 actividades de pickers.',
+            'count'   => $listado->count(),
+            'listado' => $listado,
+        ], 200);
+    }
+
+    // Para pantalla CLIENTES
     public function latest()
     {
         $tickets = DB::table('picking_tasks as pt')

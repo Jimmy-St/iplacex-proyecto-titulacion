@@ -21,7 +21,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middl
 
 // Pantallas públicas / informativas (según definiste en tu estructura)
 Route::view('/screen/customers', 'screen.customers')->name('screen.customers');
-Route::view('/screen/pickers',   'screen.splash_pickers')->name('screen.pickers');
+Route::view('/screen/pickers',   'screen.pickers')->name('screen.pickers');
 
 // Secciones protegidas
 Route::middleware('auth')->group(function () {
