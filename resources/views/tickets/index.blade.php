@@ -77,13 +77,15 @@
     </div>
   </div>
 
+  {{-- Cabecera de la Grilla (5 columnas) --}}
   <div class="hidden md:flex items-center gap-3 px-4 py-2.5
               text-[11px] font-semibold text-white/30 uppercase tracking-widest
               border-b border-white/[0.07]">
     <div class="w-6 shrink-0"></div>
-    <div class="grid grid-cols-[2fr_1fr_1fr_0.7fr] gap-2 flex-1">
+    <div class="grid grid-cols-[2fr_1fr_1fr_1fr_0.7fr] gap-2 flex-1">
       <div>Cliente</div>
       <div>Ticket</div>
+      <div>Hora</div>
       <div>Vendedor</div>
       <div class="text-center">Estado</div>
     </div>
@@ -100,10 +102,21 @@
         <div class="w-6 shrink-0 text-center text-[11px] text-white/25 font-mono">
           {{ $loop->iteration }}
         </div>
-        <div class="grid grid-cols-2 md:grid-cols-[2fr_1fr_1fr_0.7fr] gap-2 flex-1 items-center">
+        
+        {{-- Fila de la Grilla (5 columnas sincronizadas) --}}
+        <div class="grid grid-cols-2 md:grid-cols-[2fr_1fr_1fr_1fr_0.7fr] gap-2 flex-1 items-center">
           <div class="text-sm font-bold text-white">{{ $ticket->customer ?? '—' }}</div>
-          <div class="text-sm text-white/55">{{ $ticket->ticket_number }}</div>
+          
+          {{-- Nro de ticket en negrita y color más claro --}}
+          <div class="text-sm font-semibold text-white/90 font-mono">{{ $ticket->ticket_number }}</div>
+          
+          {{-- Hora del ticket formateada --}}
+          <div class="text-xs text-white/50 font-mono">
+            {{ $ticket->created_at ? $ticket->created_at->format('H:i') : '—' }}
+          </div>
+          
           <div class="hidden md:block text-sm text-white/55">{{ $ticket->seller ?? '—' }}</div>
+          
           <div class="text-right md:text-center">
             @if($taskStatus === 'COMPLETADO')
               <span class="inline-block px-2.5 py-0.5 text-[11px] font-black tracking-wider
