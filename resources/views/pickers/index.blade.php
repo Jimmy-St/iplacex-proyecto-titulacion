@@ -21,8 +21,12 @@
     </div>
   @endif
 
-  <div class="mb-5 flex items-center justify-between gap-4">
+  {{-- Barra de búsqueda y filtros de estado --}}
+  <div class="mb-5 flex flex-wrap items-center justify-between gap-4">
     <form method="GET" action="{{ route('pickers.index') }}" class="flex items-center gap-2 w-full max-w-sm">
+      @if(request('estado'))
+        <input type="hidden" name="estado" value="{{ request('estado') }}">
+      @endif
       <div class="relative w-full">
         <i data-lucide="search" class="w-4 h-4 text-white/30 absolute left-3 top-1/2 -translate-y-1/2"></i>
         <input type="text" name="search" value="{{ $search ?? '' }}" 
@@ -30,9 +34,25 @@
                class="w-full pl-9 pr-3 py-2 bg-gray-900 border border-white/[0.08] rounded-lg text-sm text-white placeholder-white/30 focus:outline-none focus:border-purple-500/50">
       </div>
       @if(!empty($search))
-        <a href="{{ route('pickers.index') }}" class="text-xs text-white/40 hover:text-white/70 underline shrink-0">Limpiar</a>
+        <a href="{{ route('pickers.index', ['estado' => request('estado')]) }}" class="text-xs text-white/40 hover:text-white/70 underline shrink-0">Limpiar</a>
       @endif
     </form>
+
+    {{-- Filtros Rápidos por Estado de Picker --}}
+    <div class="flex items-center gap-1.5 ml-auto">
+      <a href="{{ route('pickers.index', ['search' => request('search')]) }}"
+         class="px-3 h-9 inline-flex items-center text-xs font-medium rounded-lg border transition-colors {{ !request('estado') ? 'bg-purple-600/20 border-purple-500/50 text-purple-300' : 'bg-gray-900 border-white/10 text-white/50 hover:text-white' }}">
+        Todos
+      </a>
+      <a href="{{ route('pickers.index', ['search' => request('search'), 'estado' => 'disponibles']) }}"
+         class="px-3 h-9 inline-flex items-center text-xs font-medium rounded-lg border transition-colors {{ request('estado') === 'disponibles' ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300' : 'bg-gray-900 border-white/10 text-white/50 hover:text-white' }}">
+        Disponibles
+      </a>
+      <a href="{{ route('pickers.index', ['search' => request('search'), 'estado' => 'picking']) }}"
+         class="px-3 h-9 inline-flex items-center text-xs font-medium rounded-lg border transition-colors {{ request('estado') === 'picking' ? 'bg-rose-500/20 border-rose-500/50 text-rose-300' : 'bg-gray-900 border-white/10 text-white/50 hover:text-white' }}">
+        Picking
+      </a>
+    </div>
   </div>
 
   {{-- Cabecera de Tabla --}}
@@ -92,7 +112,7 @@
       </div>
     @empty
       <div class="py-12 text-center text-white/30 text-sm">
-        No se encontraron pickers registrados.
+        No se encontraron pickers para los filtros seleccionados.
       </div>
     @endforelse
   </div>

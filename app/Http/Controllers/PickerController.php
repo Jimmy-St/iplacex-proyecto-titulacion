@@ -12,6 +12,7 @@ class PickerController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search');
+        $estado = $request->input('estado');
 
         $pickers = Picker::query()
             ->withCount(['pickingTasks as active_tasks_count' => function ($query) {
@@ -25,21 +26,32 @@ class PickerController extends Controller
                         ->orWhere('employee_code', 'like', "%{$search}%");
                 });
             })
+            ->when($estado, function ($query, $estado) {
+                if ($estado === 'disponibles') {
+                    // Pickers que NO tienen ninguna tarea en PENDIENTE o PREPARANDO
+                    $query->whereDoesntHave('pickingTasks', function ($q) {
+                        $q->whereIn('status', ['PENDIENTE', 'PREPARANDO']);
+                    });
+                } elseif ($estado === 'picking') {
+                    // Pickers que SÍ tienen al menos una tarea en PENDIENTE o PREPARANDO
+                    $query->whereHas('pickingTasks', function ($q) {
+                        $q->whereIn('status', ['PENDIENTE', 'PREPARANDO']);
+                    });
+                }
+            })
             ->latest()
             ->paginate(20)
             ->withQueryString();
 
-        return view('pickers.index', compact('pickers', 'search'));
+        return view('pickers.index', compact('pickers', 'search', 'estado'));
     }
 
     public function show(Picker $picker)
     {
-        // 1. Calculamos sus tareas activas actuales para los badges
         $picker->loadCount(['pickingTasks as active_tasks_count' => function ($query) {
             $query->whereIn('status', ['PENDIENTE', 'PREPARANDO']);
         }]);
 
-        // 2. Historial paginado de tareas y tickets asociados, del más reciente al más antiguo
         $assignedTasks = $picker->pickingTasks()
             ->with('ticket')
             ->latest('picking_assignments.created_at')
