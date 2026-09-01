@@ -24,19 +24,25 @@ class ReportesController extends Controller
         $pendientes = $tareasDia->where('status', '!=', 'COMPLETADO')->count();
         $completados = $tareasDia->where('status', 'COMPLETADO')->count();
 
-        // 3. Tiempo Promedio de Ciclo (en minutos) para tareas COMPLETADAS en la fecha
-        $tareasCompletadas = PickingTask::where('status', 'COMPLETADO')
+        // 3. Tiempo Promedio de Ciclo: Solo tareas creadas y completadas el mismo día seleccionado
+        $tareasCompletadasHoy = PickingTask::where('status', 'COMPLETADO')
             ->whereDate('updated_at', $fecha)
             ->get();
 
         $tiempoTotalMinutos = 0;
         $cantidadConTiempo = 0;
 
-        foreach ($tareasCompletadas as $tarea) {
+        foreach ($tareasCompletadasHoy as $tarea) {
             if ($tarea->created_at && $tarea->updated_at) {
-                $minutos = Carbon::parse($tarea->created_at)->diffInMinutes(Carbon::parse($tarea->updated_at));
-                $tiempoTotalMinutos += $minutos;
-                $cantidadConTiempo++;
+                $fCreacion = Carbon::parse($tarea->created_at);
+                $fActualizacion = Carbon::parse($tarea->updated_at);
+
+                // Validamos que la tarea haya nacido y muerto el mismo día para evitar saltos absurdos
+                if ($fCreacion->toDateString() === $fecha && $fActualizacion->toDateString() === $fecha) {
+                    $minutos = $fCreacion->diffInMinutes($fActualizacion);
+                    $tiempoTotalMinutos += $minutos;
+                    $cantidadConTiempo++;
+                }
             }
         }
 
@@ -47,7 +53,6 @@ class ReportesController extends Controller
         // 4. Desempeño por Picker
         $pickers = Picker::all();
 
-        // Pasamos explícitamente $fecha dentro del use() para que la closure la reconozca sin errores
         $rendimientoPickers = $pickers->map(function ($picker) use ($fecha) {
 
             $asignaciones = DB::table('picking_assignments')
@@ -62,13 +67,17 @@ class ReportesController extends Controller
                 return $task->status === 'COMPLETADO' && $fechaActualizacion === $fecha;
             });
 
-            // Tiempo promedio individual del picker
+            // Tiempo promedio individual del picker (restringido al mismo día)
             $tMinutos = 0;
             $tCount = 0;
             foreach ($completadasPicker as $task) {
                 if ($task->created_at && $task->updated_at) {
-                    $tMinutos += Carbon::parse($task->created_at)->diffInMinutes(Carbon::parse($task->updated_at));
-                    $tCount++;
+                    $fC = Carbon::parse($task->created_at);
+                    $fA = Carbon::parse($task->updated_at);
+                    if ($fC->toDateString() === $fecha && $fA->toDateString() === $fecha) {
+                        $tMinutos += $fC->diffInMinutes($fA);
+                        $tCount++;
+                    }
                 }
             }
             $promedioPicker = $tCount > 0 ? round($tMinutos / $tCount, 1) : 0;
@@ -95,8 +104,12 @@ class ReportesController extends Controller
             ];
         });
 
+        // Formatear la fecha para mostrarla limpiamente en la vista (DD-MM-YYYY)
+        $fechaFormateada = Carbon::parse($fecha)->format('d-m-Y');
+
         return view('reportes.index', compact(
             'fecha',
+            'fechaFormateada',
             'totalTickets',
             'pendientes',
             'completados',

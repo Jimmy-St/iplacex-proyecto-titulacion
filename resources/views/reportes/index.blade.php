@@ -47,7 +47,7 @@
   <div class="bg-gray-900 border border-white/[0.06] rounded-xl overflow-hidden">
     <div class="px-5 py-4 border-b border-white/[0.06] flex items-center justify-between">
       <h3 class="text-white font-semibold text-sm">Rendimiento por Preparador (Picker)</h3>
-      <span class="text-xs text-white/40">Mostrando fecha: {{ $fecha }}</span>
+      <span class="text-xs text-white/40">Mostrando fecha: {{ $fechaFormateada }}</span>
     </div>
 
     {{-- Cabecera de Tabla --}}
