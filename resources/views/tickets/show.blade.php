@@ -160,10 +160,10 @@
                         </div>
 
                         {{-- Badge Boleta --}}
-                        <x-tickets.receipt-badge :ticket="$ticket" />
+                        {{-- <x-tickets.receipt-badge :ticket="$ticket" /> --}}
 
                         {{-- Badge Estado de Pago --}}
-                        <x-tickets.paid-badge :ticket="$ticket" />
+                        {{-- <x-tickets.paid-badge :ticket="$ticket" /> --}}
                     </div>
 
                     {{-- Dropdown de Estados --}}
