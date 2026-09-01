@@ -21,13 +21,19 @@ class TicketController extends Controller
     {
         $fecha  = request('fecha', date('Y-m-d'));
         $buscar = request('buscar');
+        $estado = request('estado'); // Capturamos el filtro de estado
 
-        $tickets = Ticket::whereDate('created_at', $fecha)
+        $tickets = Ticket::with('pickingTask')
+            ->whereDate('created_at', $fecha)
             ->when($buscar, fn($q) => $q->where('ticket_number', 'LIKE', "%{$buscar}%"))
+            ->when($estado, function ($q) use ($estado) {
+                // Filtramos a través de la relación pickingTask
+                $q->whereHas('pickingTask', fn($query) => $query->where('status', $estado));
+            })
             ->latest()
             ->get();
 
-        return view('tickets.index', compact('tickets', 'fecha'));
+        return view('tickets.index', compact('tickets', 'fecha', 'estado'));
     }
 
     public function show($ticket_number)

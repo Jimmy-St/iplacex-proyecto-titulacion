@@ -4,12 +4,17 @@
 
   <div class="mb-6">
     <span class="text-[11px] text-white/35 uppercase tracking-widest block mb-2">Tickets del día</span>
-    <div class="flex items-center gap-2">
+    
+    {{-- Barra de Filtros (Fecha, Búsqueda y Estados) --}}
+    <div class="flex flex-wrap items-center gap-2">
 
       {{-- Filtro fecha — submit automático al cambiar --}}
       <form method="GET" action="{{ route('tickets.index') }}">
         @if(request('buscar'))
           <input type="hidden" name="buscar" value="{{ request('buscar') }}">
+        @endif
+        @if(request('estado'))
+          <input type="hidden" name="estado" value="{{ request('estado') }}">
         @endif
         <input
           type="date"
@@ -29,6 +34,9 @@
       {{-- Buscador por número — submit con botón --}}
       <form method="GET" action="{{ route('tickets.index') }}" class="flex items-center gap-2">
         <input type="hidden" name="fecha" value="{{ $fecha }}">
+        @if(request('estado'))
+          <input type="hidden" name="estado" value="{{ request('estado') }}">
+        @endif
         <input
           type="text"
           name="buscar"
@@ -45,6 +53,26 @@
           <i data-lucide="search" class="w-3.5 h-3.5" style="stroke-width:1.5"></i>
         </button>
       </form>
+
+      {{-- Filtros Rápidos por Estado --}}
+      <div class="flex items-center gap-1.5 ml-auto">
+        <a href="{{ route('tickets.index', ['fecha' => $fecha, 'buscar' => request('buscar')]) }}"
+           class="px-3 h-9 inline-flex items-center text-xs font-medium rounded-lg border transition-colors {{ !request('estado') ? 'bg-purple-600/20 border-purple-500/50 text-purple-300' : 'bg-gray-900 border-white/10 text-white/50 hover:text-white' }}">
+          Todos
+        </a>
+        <a href="{{ route('tickets.index', ['fecha' => $fecha, 'buscar' => request('buscar'), 'estado' => 'PENDIENTE']) }}"
+           class="px-3 h-9 inline-flex items-center text-xs font-medium rounded-lg border transition-colors {{ request('estado') === 'PENDIENTE' ? 'bg-purple-600/20 border-purple-500/50 text-purple-300' : 'bg-gray-900 border-white/10 text-white/50 hover:text-white' }}">
+          Pendientes
+        </a>
+        <a href="{{ route('tickets.index', ['fecha' => $fecha, 'buscar' => request('buscar'), 'estado' => 'PREPARANDO']) }}"
+           class="px-3 h-9 inline-flex items-center text-xs font-medium rounded-lg border transition-colors {{ request('estado') === 'PREPARANDO' ? 'bg-amber-500/20 border-amber-500/50 text-amber-300' : 'bg-gray-900 border-white/10 text-white/50 hover:text-white' }}">
+          Preparando
+        </a>
+        <a href="{{ route('tickets.index', ['fecha' => $fecha, 'buscar' => request('buscar'), 'estado' => 'COMPLETADO']) }}"
+           class="px-3 h-9 inline-flex items-center text-xs font-medium rounded-lg border transition-colors {{ request('estado') === 'COMPLETADO' ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300' : 'bg-gray-900 border-white/10 text-white/50 hover:text-white' }}">
+          Completados
+        </a>
+      </div>
 
     </div>
   </div>
@@ -63,6 +91,9 @@
 
   <div class="divide-y divide-white/[0.05]">
     @forelse($tickets as $ticket)
+      @php
+          $taskStatus = optional($ticket->pickingTask)->status ?? 'PENDIENTE';
+      @endphp
       <a href="{{ route('tickets.show', $ticket->ticket_number) }}"
          class="flex items-center gap-3 px-4 py-4
                 hover:bg-slate-800/20 transition-colors cursor-pointer">
@@ -74,15 +105,20 @@
           <div class="text-sm text-white/55">{{ $ticket->ticket_number }}</div>
           <div class="hidden md:block text-sm text-white/55">{{ $ticket->seller ?? '—' }}</div>
           <div class="text-right md:text-center">
-            @if($ticket->status === 'pending')
+            @if($taskStatus === 'COMPLETADO')
               <span class="inline-block px-2.5 py-0.5 text-[11px] font-black tracking-wider
-                           bg-red-500/15 text-red-400 border border-red-500/25 rounded-md">
-                PEND.
+                           bg-emerald-500/15 text-emerald-400 border border-emerald-500/25 rounded-md">
+                COMPLETADO
+              </span>
+            @elseif($taskStatus === 'PREPARANDO')
+              <span class="inline-block px-2.5 py-0.5 text-[11px] font-black tracking-wider
+                           bg-amber-500/15 text-amber-400 border border-amber-500/25 rounded-md">
+                PREPARANDO
               </span>
             @else
               <span class="inline-block px-2.5 py-0.5 text-[11px] font-black tracking-wider
-                           bg-green-500/15 text-green-400 border border-green-500/25 rounded-md">
-                OK
+                           bg-purple-500/15 text-purple-400 border border-purple-500/25 rounded-md">
+                PENDIENTE
               </span>
             @endif
           </div>
@@ -90,8 +126,8 @@
       </a>
     @empty
       <div class="px-4 py-12 text-center text-white/25 text-sm">
-        @if(request('buscar'))
-          Sin resultados para "{{ request('buscar') }}"
+        @if(request('buscar') || request('estado'))
+          Sin resultados para los filtros seleccionados.
         @else
           Sin tickets para el {{ \Carbon\Carbon::parse($fecha)->format('d-m-Y') }}
         @endif
