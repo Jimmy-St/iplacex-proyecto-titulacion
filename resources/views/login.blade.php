@@ -7,13 +7,13 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="bg-gray-950 min-h-screen flex items-center justify-center">
+<body class="bg-slate-100 min-h-screen flex items-center justify-center">
 
-    <div class="bg-gray-900 border border-white/10 rounded-xl p-8 w-80 flex flex-col items-center text-center">
+    <div class="bg-white border border-slate-200 shadow-xl rounded-xl p-8 w-80 flex flex-col items-center text-center">
 
-        <!-- Ícono de paquete limpio -->
-        <div class="mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="w-16 h-16 text-white">
+        <!-- Ícono de paquete con tono morado -->
+        <div class="mb-4 text-purple-600">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" class="w-16 h-16">
                 <path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/>
                 <path d="M12 22V12"/>
                 <polyline points="3.29 7 12 12 20.71 7"/>
@@ -21,43 +21,43 @@
             </svg>
         </div>
 
-        <p class="text-white font-medium tracking-widest uppercase text-lg mb-4 w-full text-center">Gestión Picking</p>
+        <p class="text-slate-900 font-bold tracking-widest uppercase text-sm mb-6 w-full text-center">Gestión Picking</p>
 
         @if(session('error'))
-            <p class="text-red-400 text-sm mb-4 w-full text-center">{{ session('error') }}</p>
+            <p class="text-red-600 font-medium text-xs mb-4 w-full text-center bg-red-50 border border-red-200 p-2 rounded-md">{{ session('error') }}</p>
         @endif
 
         <form action="{{ route('login.post') }}" method="POST" class="flex flex-col gap-4 w-full text-left">
             @csrf
 
             <div class="flex flex-col gap-1.5">
-                <label class="text-white/40 text-xs uppercase tracking-widest">Usuario</label>
-                <div class="flex items-center gap-2 bg-gray-950 border border-white/10 rounded-md px-3 h-10">
-                    <i data-lucide="user" class="w-4 h-4 text-white/30" style="stroke-width:1.5"></i>
+                <label class="text-slate-600 text-xs font-semibold uppercase tracking-wider">Usuario</label>
+                <div class="flex items-center gap-2 bg-slate-50 border border-slate-300 rounded-md px-3 h-10 focus-within:border-purple-600 focus-within:bg-white transition-colors">
+                    <i data-lucide="user" class="w-4 h-4 text-slate-400" style="stroke-width:1.5"></i>
                     <input type="text" 
                            name="username" 
                            value="{{ old('username') }}" 
                            placeholder="usuario"
-                           class="bg-transparent border-none outline-none text-white text-sm w-full placeholder-white/20"
+                           class="bg-transparent border-none outline-none text-slate-900 text-sm w-full placeholder-slate-400"
                            required 
                            autofocus>
                 </div>
             </div>
 
             <div class="flex flex-col gap-1.5">
-                <label class="text-white/40 text-xs uppercase tracking-widest">Contraseña</label>
-                <div class="flex items-center gap-2 bg-gray-950 border border-white/10 rounded-md px-3 h-10">
-                    <i data-lucide="lock" class="w-4 h-4 text-white/30" style="stroke-width:1.5"></i>
+                <label class="text-slate-600 text-xs font-semibold uppercase tracking-wider">Contraseña</label>
+                <div class="flex items-center gap-2 bg-slate-50 border border-slate-300 rounded-md px-3 h-10 focus-within:border-purple-600 focus-within:bg-white transition-colors">
+                    <i data-lucide="lock" class="w-4 h-4 text-slate-400" style="stroke-width:1.5"></i>
                     <input type="password" 
                            name="password" 
                            placeholder="••••••••"
-                           class="bg-transparent border-none outline-none text-white text-sm w-full placeholder-white/20"
+                           class="bg-transparent border-none outline-none text-slate-900 text-sm w-full placeholder-slate-400"
                            required>
                 </div>
             </div>
 
             <button type="submit"
-                class="w-full h-10 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-md transition-colors mt-2">
+                class="w-full h-10 bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold rounded-md shadow-md shadow-purple-600/20 transition-all mt-2 cursor-pointer">
                 Ingresar
             </button>
         </form>
