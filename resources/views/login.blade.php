@@ -13,18 +13,32 @@
         input:-webkit-autofill:focus, 
         input:-webkit-autofill:active {
             -webkit-box-shadow: 0 0 0 30px white inset !important;
-            -webkit-text-fill-color: #0f172a !important; /* Color del texto oscuro (#111111 o slate-900) */
+            -webkit-text-fill-color: #0f172a !important;
             transition: background-color 5000s ease-in-out 0s;
+        }
+
+        /* Animación de flotación suave (para aplicar solo al ícono) */
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-8px); /* Sube 8px */
+            }
+        }
+
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+            display: inline-block; /* Necesario para que funcione la transformación en SVG */
         }
     </style>
 </head>
-<body class="bg-slate-100 min-h-screen flex items-center justify-center">
+<body class="bg-slate-100 min-h-screen flex flex-col items-center justify-center p-4">
 
     <div class="bg-white border border-slate-200 shadow-xl rounded-xl p-8 w-80 flex flex-col items-center text-center">
 
-        <!-- Ícono de paquete con tono morado -->
-        <div class="mb-4 text-purple-600">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" class="w-16 h-16">
+        <div class="mb-2 text-purple-600 animate-float">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="w-20 h-20">
                 <path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/>
                 <path d="M12 22V12"/>
                 <polyline points="3.29 7 12 12 20.71 7"/>
@@ -68,11 +82,15 @@
             </div>
 
             <button type="submit"
-                class="w-full h-10 bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold rounded-md shadow-md shadow-purple-600/20 transition-all mt-2 cursor-pointer">
+                class="w-full h-10 bg-gradient-to-r from-purple-700 via-purple-800 to-purple-900 hover:opacity-95 text-white text-sm font-semibold rounded-md shadow-lg shadow-purple-900/30 transition-all mt-2 cursor-pointer">
                 Ingresar
             </button>
         </form>
     </div>
+
+    <footer class="mt-4 text-slate-500 text-xs font-medium tracking-wide">
+        Sistema Picking Pfau {{ date('Y') }}
+    </footer>
 
     <script>
         lucide.createIcons();
