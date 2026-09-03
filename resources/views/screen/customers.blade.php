@@ -7,18 +7,18 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
         :root {
-            /* Colores de Fondo y Bordes con acento morado más visible */
+            /* Colores de Fondo y Bordes */
             --color-bg-body: #f8fafc;
             --color-bg-card: #ffffff;
-            --color-bg-row-alt: rgba(233, 213, 255, 0.45); /* Interlineado moradito más notorio */
-            --color-border: #c084fc; /* Líneas de borde en morado más vivo (purple-400) */
+            --color-bg-row-alt: rgba(233, 213, 255, 0.35); /* Interlineado suave */
+            --color-border: #c084fc; /* Tono morado mantenido */
 
             /* Colores de Tipografía */
             --color-text-main: #0f172a;
-            --color-text-muted: #64748b;
+            --color-text-muted: #581c87;
             --color-text-ticket: #334155;
             --color-text-badge: #ffffff;
-            --color-title: #9333ea; /* Título principal en morado */
+            --color-title: #9333ea;
 
             /* Tipografías */
             --font-family-base: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
@@ -38,7 +38,7 @@
             --container-radius: 1rem;
             --grid-columns-layout: 2.5fr 0.8fr 1.3fr 0.5fr;
             --grid-padding-x: 2vw;
-            --badge-width: 120px;
+            --badge-width: 135px; /* Ancho ajustado y unificado para que quepa bien A PAGAR */
             --badge-padding-y: 0.5vh;
             --badge-radius: 0.5rem;
         }
@@ -66,9 +66,9 @@
             height: 100%;
             max-width: var(--container-max-width);
             background-color: var(--color-bg-card);
-            border: 2px solid var(--color-border);
+            border: 1px solid var(--color-border); /* Borde perimetral más fino (1px) */
             border-radius: var(--container-radius);
-            box-shadow: 0 15px 30px -5px rgba(147, 51, 234, 0.15);
+            box-shadow: 0 15px 30px -5px rgba(147, 51, 234, 0.1);
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -77,7 +77,7 @@
         .screen-header {
             flex-shrink: 0;
             background-color: #faf5ff;
-            border-bottom: 2px solid var(--color-border);
+            border-bottom: 1px solid var(--color-border); /* Borde más fino */
             padding: 1.2vh var(--grid-padding-x);
             text-align: center;
         }
@@ -87,7 +87,6 @@
             font-size: var(--font-size-title);
             font-weight: 900;
             letter-spacing: 0.08em;
-            text-shadow: 0 1px 2px rgba(147, 51, 234, 0.1);
         }
 
         .columns-header {
@@ -96,12 +95,12 @@
             grid-template-columns: var(--grid-columns-layout);
             align-items: center;
             padding: 1vh var(--grid-padding-x);
-            border-bottom: 2px solid var(--color-border);
-            background-color: #f3e8ff; /* Fondo morado claro para cabecera de tabla */
+            border-bottom: 1px solid var(--color-border); /* Borde más fino */
+            background-color: #f3e8ff;
         }
 
         .column-label {
-            color: #581c87;
+            color: var(--color-text-muted);
             font-size: var(--font-size-header);
             font-weight: 800;
             letter-spacing: 0.05em;
@@ -117,7 +116,7 @@
             display: flex;
             flex-direction: column;
             min-height: 0;
-            gap: 0.8vh;
+            gap: 0.6vh;
             padding: 1vh 0;
         }
 
@@ -128,7 +127,7 @@
             align-items: center;
             padding: 0 var(--grid-padding-x);
             background-color: transparent;
-            border-bottom: 1.5px solid var(--color-border);
+            /* Se eliminaron las líneas horizontales divisorias */
         }
 
         .order-row-alt {
@@ -169,7 +168,7 @@
             justify-content: flex-end;
         }
 
-        /* Widgets/Badges con estilo de botón degradado y bordes sólidos notorios */
+        /* Widgets/Badges sin borde exterior, tamaño unificado y texto A PAGAR */
         .status-badge {
             font-family: var(--font-family-badge);
             color: var(--color-text-badge);
@@ -185,22 +184,19 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 3px 6px rgba(0, 0, 0, 0.12);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .badge-pending {
             background: linear-gradient(135deg, #fbbf24, #d97706);
-            border: 2px solid #b45309;
         }
 
         .badge-progress {
             background: linear-gradient(135deg, #60a5fa, #2563eb);
-            border: 2px solid #1d4ed8;
         }
 
         .badge-pagar {
             background: linear-gradient(135deg, #34d399, #059669);
-            border: 2px solid #047857;
         }
     </style>
 </head>
@@ -253,9 +249,9 @@
                     'preparando': { label: 'PREP.', class: 'badge-progress' },
                     'prog': { label: 'PREP.', class: 'badge-progress' },
                     
-                    'completed': { label: 'PAGAR', class: 'badge-pagar' },
-                    'completado': { label: 'PAGAR', class: 'badge-pagar' },
-                    'comp': { label: 'PAGAR', class: 'badge-pagar' }
+                    'completed': { label: 'A PAGAR', class: 'badge-pagar' },
+                    'completado': { label: 'A PAGAR', class: 'badge-pagar' },
+                    'comp': { label: 'A PAGAR', class: 'badge-pagar' }
                 },
                 getStatusConfig(status) {
                     const key = String(status || '').toLowerCase().trim();
