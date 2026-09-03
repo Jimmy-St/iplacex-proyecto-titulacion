@@ -31,7 +31,7 @@
         >
       </form>
 
-      {{-- Buscador por número — submit con botón --}}
+      {{-- Buscador multicriterio (Ticket, Cliente o Vendedor) --}}
       <form method="GET" action="{{ route('tickets.index') }}" class="flex items-center gap-2">
         <input type="hidden" name="fecha" value="{{ $fecha }}">
         @if(request('estado'))
@@ -41,9 +41,9 @@
           type="text"
           name="buscar"
           value="{{ request('buscar') }}"
-          placeholder="Nº ticket..."
+          placeholder="Buscar ticket, cliente, vendedor..."
           class="bg-gray-900 border border-white/10 rounded-lg px-3 h-9
-                 text-white text-sm outline-none w-36
+                 text-white text-sm outline-none w-56
                  focus:border-purple-500 transition-colors placeholder-white/20"
         >
         <button type="submit"
