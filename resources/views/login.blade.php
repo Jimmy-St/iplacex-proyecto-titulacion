@@ -7,13 +7,13 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        /* Coincide exactamente con el tono bg-slate-50 (#f8fafc) de los inputs */
+        /* Neutraliza el fondo azul feo del autocompletado en Chrome */
         input:-webkit-autofill,
         input:-webkit-autofill:hover, 
         input:-webkit-autofill:focus, 
         input:-webkit-autofill:active {
-            -webkit-box-shadow: 0 0 0 30px #f8fafc inset !important;
-            -webkit-text-fill-color: #0f172a !important; /* Texto oscuro de alto contraste */
+            -webkit-box-shadow: 0 0 0 30px white inset !important;
+            -webkit-text-fill-color: #0f172a !important; /* Color del texto oscuro (#111111 o slate-900) */
             transition: background-color 5000s ease-in-out 0s;
         }
     </style>
