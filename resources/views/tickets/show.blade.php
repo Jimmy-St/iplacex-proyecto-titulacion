@@ -139,31 +139,25 @@
         {{-- Botón Volver --}}
         <div class="mb-6 flex items-center gap-3">
           <a href="{{ route('tickets.index') }}"
-             class="flex items-center gap-1.5 text-white/35 hover:text-white/70 text-sm transition-colors">
-            <i data-lucide="arrow-left" class="w-4 h-4" style="stroke-width:1.5"></i>
+             class="flex items-center gap-1.5 text-slate-500 hover:text-slate-900 text-sm font-medium transition-colors">
+            <i data-lucide="arrow-left" class="w-4 h-4" style="stroke-width:1.75"></i>
             Volver
           </a>
-          <span class="text-white/15">/</span>
-          <span class="text-white/55 text-sm">Ticket #{{ $ticket->ticket_number }}</span>
+          <span class="text-slate-300">/</span>
+          <span class="text-slate-700 text-sm font-medium">Ticket #{{ $ticket->ticket_number }}</span>
         </div>
 
         {{-- LAYOUT SUPERIOR (2 Secciones) --}}
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
 
             {{-- SECCIÓN 1: DATOS DEL TICKET --}}
-            <div class="lg:col-span-2 bg-gray-900 border border-white/[0.06] rounded-xl p-5 flex flex-col justify-between gap-y-5">
+            <div class="lg:col-span-2 bg-white border border-purple-200 rounded-xl p-5 flex flex-col justify-between gap-y-5 shadow-sm">
                 <div class="flex flex-wrap justify-between items-start gap-4">
                     <div class="flex items-start gap-4">
                         <div>
-                            <p class="text-[11px] text-white/35 uppercase tracking-widest mb-1">Número de Ticket</p>
-                            <h1 class="text-xl font-semibold text-white tracking-tight">#{{ $ticket->ticket_number }}</h1>
+                            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Número de Ticket</p>
+                            <h1 class="text-xl font-bold text-slate-900 tracking-tight">#{{ $ticket->ticket_number }}</h1>
                         </div>
-
-                        {{-- Badge Boleta --}}
-                        {{-- <x-tickets.receipt-badge :ticket="$ticket" /> --}}
-
-                        {{-- Badge Estado de Pago --}}
-                        {{-- <x-tickets.paid-badge :ticket="$ticket" /> --}}
                     </div>
 
                     {{-- Dropdown de Estados --}}
@@ -171,53 +165,53 @@
                 </div>
 
                 {{-- Detalles Inferiores Originales --}}
-                <div class="flex items-center justify-between pt-3 border-t border-white/[0.04]">
+                <div class="flex items-center justify-between pt-3 border-t border-slate-100">
                     <div class="flex items-center gap-8">
                         <div>
-                            <p class="text-[10px] text-white/35 uppercase tracking-widest mb-0.5">Monto Total</p>
-                            <p class="text-base font-semibold text-white/90">${{ number_format($ticket->total_amount, 0, ',', '.') }}</p>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Monto Total</p>
+                            <p class="text-base font-bold text-slate-900">${{ number_format($ticket->total_amount, 0, ',', '.') }}</p>
                         </div>
                         <div>
-                            <p class="text-[10px] text-white/35 uppercase tracking-widest mb-0.5">Vendedor (Seller)</p>
-                            <p class="text-sm text-white/70 max-w-[150px] truncate">{{ $ticket->seller ?? '—' }}</p>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Vendedor (Seller)</p>
+                            <p class="text-sm font-medium text-slate-700 max-w-[150px] truncate">{{ $ticket->seller ?? '—' }}</p>
                         </div>
                         <div>
-                            <p class="text-[10px] text-white/35 uppercase tracking-widest mb-0.5">Canal de Origen</p>
-                            <p class="text-sm text-white/70">Venta Digital</p>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Canal de Origen</p>
+                            <p class="text-sm font-medium text-slate-700">Venta Digital</p>
                         </div>
                     </div>
                     <div class="text-right">
-                        <p class="text-[10px] text-white/35 uppercase tracking-widest mb-0.5">Actualizado</p>
-                        <p class="text-sm text-white/55 font-mono">{{ $ticket->updated_at ? $ticket->updated_at->format('d-m-Y H:i') : '—' }}</p>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Actualizado</p>
+                        <p class="text-sm text-slate-600 font-mono font-medium">{{ $ticket->updated_at ? $ticket->updated_at->format('d-m-Y H:i') : '—' }}</p>
                     </div>
                 </div>
             </div>
 
             {{-- SECCIÓN 2: ASIGNACIÓN DE PICKERS --}}
-            <div class="bg-gray-900 border border-white/[0.06] rounded-xl p-5 flex flex-col justify-between min-h-[140px]">
+            <div class="bg-white border border-purple-200 rounded-xl p-5 flex flex-col justify-between min-h-[140px] shadow-sm">
                 <div class="flex justify-between items-start mb-2">
                     <div>
-                        <p class="text-[11px] text-white/35 uppercase tracking-widest mb-1">Pickers Asignados</p>
-                        <p class="text-xs font-medium text-white/80" x-text="assignedPickers.length + ' / 5 Operadores'"></p>
+                        <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Pickers Asignados</p>
+                        <p class="text-xs font-semibold text-slate-700" x-text="assignedPickers.length + ' / 5 Operadores'"></p>
                     </div>
 
                     <button @click="openModal()" 
                             :disabled="status === 'COMPLETADO'"
-                            class="p-2 rounded-xl border transition-all flex items-center justify-center"
-                            :class="status === 'COMPLETADO' ? 'bg-white/[0.02] border-white/[0.04] text-white/15 cursor-not-allowed' : (assignedPickers.length === 0 ? 'bg-white/[0.02] border-white/[0.06] text-white/20' : 'bg-purple-500/10 border-purple-500/30 text-purple-400')">
-                        <i data-lucide="user" x-show="assignedPickers.length === 0" class="w-5 h-5" style="stroke-width:1.5"></i>
-                        <i data-lucide="user-check" x-show="assignedPickers.length === 1" class="w-5 h-5" style="stroke-width:1.5" style="display: none;"></i>
-                        <i data-lucide="users" x-show="assignedPickers.length > 1" class="w-5 h-5" style="stroke-width:1.5" style="display: none;"></i>
+                            class="p-2 rounded-xl border transition-all flex items-center justify-center shadow-sm"
+                            :class="status === 'COMPLETADO' ? 'bg-slate-50 border-slate-200 text-slate-300 cursor-not-allowed' : (assignedPickers.length === 0 ? 'bg-slate-50 border-purple-200 text-slate-400 hover:text-purple-600' : 'bg-purple-50 border-purple-300 text-purple-700')">
+                        <i data-lucide="user" x-show="assignedPickers.length === 0" class="w-5 h-5" style="stroke-width:1.75"></i>
+                        <i data-lucide="user-check" x-show="assignedPickers.length === 1" class="w-5 h-5" style="stroke-width:1.75" style="display: none;"></i>
+                        <i data-lucide="users" x-show="assignedPickers.length > 1" class="w-5 h-5" style="stroke-width:1.75" style="display: none;"></i>
                     </button>
                 </div>
 
                 {{-- Tags Exteriores --}}
                 <div class="flex flex-wrap gap-1.5 mt-2">
                     <template x-if="assignedPickers.length === 0">
-                        <span class="text-xs text-white/25 italic py-1">Sin personal asignado</span>
+                        <span class="text-xs text-slate-400 italic py-1 font-medium">Sin personal asignado</span>
                     </template>
                     <template x-for="p in assignedPickers" :key="p.id">
-                        <span class="inline-flex items-center bg-white/[0.04] border border-white/[0.06] rounded-lg px-2.5 py-0.5 text-[11px] text-white/70 max-w-[140px]">
+                        <span class="inline-flex items-center bg-purple-50 border border-purple-200 rounded-lg px-2.5 py-0.5 text-[11px] font-semibold text-purple-800 max-w-[140px]">
                             <span class="truncate whitespace-nowrap" x-text="p.display_name"></span>
                         </span>
                     </template>
@@ -228,21 +222,21 @@
 
         {{-- MODAL ASIGNAR PICKERS --}}
         <div x-show="showPickerModal" class="fixed inset-0 z-50 flex justify-end" style="display: none;" role="dialog" aria-modal="true">
-            <div x-show="showPickerModal" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" class="fixed inset-0 bg-black/60 backdrop-blur-sm" @click="showPickerModal = false"></div>
+            <div x-show="showPickerModal" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm" @click="showPickerModal = false"></div>
 
             <div x-show="showPickerModal" 
                  x-transition:enter="transition ease-out duration-300 transform" 
                  x-transition:enter-start="translate-x-full" 
                  x-transition:enter-end="translate-x-0" 
-                 class="relative w-full max-w-md h-full bg-zinc-950 border-l border-white/[0.08] shadow-2xl flex flex-col text-white z-50 pb-20 md:pb-0 overflow-hidden">
+                 class="relative w-full max-w-md h-full bg-white border-l border-purple-200 shadow-2xl flex flex-col text-slate-900 z-50 pb-20 md:pb-0 overflow-hidden">
 
                 {{-- Cabecera Fija --}}
-                <div class="p-4 border-b border-white/[0.06] flex items-center justify-between shrink-0">
+                <div class="p-4 border-b border-purple-100 flex items-center justify-between shrink-0 bg-slate-50/50">
                     <div>
-                        <h3 class="text-sm font-semibold">Asignación de Personal</h3>
-                        <p class="text-[11px] text-white/40 mt-0.5" x-text="modalPickers.length + ' de 5 seleccionados'"></p>
+                        <h3 class="text-sm font-bold text-slate-900">Asignación de Personal</h3>
+                        <p class="text-[11px] font-medium text-slate-500 mt-0.5" x-text="modalPickers.length + ' de 5 seleccionados'"></p>
                     </div>
-                    <button @click="showPickerModal = false" class="p-1 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/[0.04]"><i data-lucide="x" class="w-5 h-5"></i></button>
+                    <button @click="showPickerModal = false" class="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100"><i data-lucide="x" class="w-5 h-5"></i></button>
                 </div>
 
                 {{-- Cuerpo del Modal con Scroll Único --}}
@@ -250,20 +244,20 @@
 
                     {{-- LADO IZQUIERDO: Disponibles --}}
                     <div class="flex-1 min-w-0">
-                        <p class="text-[10px] text-white/35 uppercase tracking-widest font-semibold mb-2 sticky top-0 bg-zinc-950 py-1 z-10">Disponibles</p>
+                        <p class="text-[10px] text-slate-400 uppercase tracking-widest font-bold mb-2 sticky top-0 bg-white py-1 z-10">Disponibles</p>
                         <div class="space-y-1.5">
                             <template x-for="picker in availablePickers" :key="picker.id">
                                 <button @click="addPickerToModal(picker)" 
-                                        class="w-full flex items-center justify-between text-left p-2.5 rounded-xl border text-xs transition-all gap-3 min-w-0" 
-                                        :class="modalPickers.find(p => p.id === picker.id) ? 'bg-zinc-900 border-white/[0.02] text-white/20 cursor-not-allowed' : 'bg-white/[0.02] border-white/[0.05] hover:border-white/[0.15] text-white/80 hover:bg-white/[0.04]'">
+                                        class="w-full flex items-center justify-between text-left p-2.5 rounded-xl border text-xs transition-all gap-3 min-w-0 shadow-sm" 
+                                        :class="modalPickers.find(p => p.id === picker.id) ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed' : 'bg-white border-purple-200 hover:border-purple-400 text-slate-800 hover:bg-purple-50/30 font-medium'">
 
-                                    <span class="truncate whitespace-nowrap flex-1 min-w-0" x-text="picker.display_name"></span>
+                                    <span class="truncate whitespace-nowrap flex-1 min-w-0 font-semibold" x-text="picker.display_name"></span>
 
-                                    {{-- BADGE DINÁMICO DE TAREAS ACTIVAS (Verde si es 0, Rojo si es >= 1) --}}
-                                    <span class="flex items-center justify-center shrink-0 px-1.5 h-5 min-w-[20px] rounded-full text-[10px] font-bold font-mono tracking-tighter border transition-colors"
+                                    {{-- BADGE DINÁMICO DE TAREAS ACTIVAS --}}
+                                    <span class="flex items-center justify-center shrink-0 px-1.5 h-5 min-w-[20px] rounded-full text-[10px] font-bold font-mono tracking-tighter border transition-colors shadow-sm"
                                           :class="picker.active_tasks_count > 0 
-                                              ? 'bg-rose-500/10 border-rose-500/30 text-rose-400' 
-                                              : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'"
+                                              ? 'bg-rose-50 border-rose-200 text-rose-700' 
+                                              : 'bg-emerald-50 border-emerald-200 text-emerald-700'"
                                           x-text="picker.active_tasks_count">
                                     </span>
 
@@ -273,74 +267,74 @@
                     </div>
 
                     {{-- LADO DERECHO: Selección en Modal --}}
-                    <div class="w-full md:w-44 bg-white/[0.01] border border-white/[0.04] rounded-xl p-3 flex flex-col h-fit md:sticky md:top-0 min-w-0">
-                        <p class="text-[10px] text-white/35 uppercase tracking-widest font-semibold mb-2">Selección</p>
+                    <div class="w-full md:w-44 bg-slate-50 border border-purple-200 rounded-xl p-3 flex flex-col h-fit md:sticky md:top-0 min-w-0 shadow-sm">
+                        <p class="text-[10px] text-slate-400 uppercase tracking-widest font-bold mb-2">Selección</p>
                         <div class="space-y-1.5 min-w-0">
                             <template x-for="p in modalPickers" :key="p.id">
-                                <div class="flex items-center justify-between bg-purple-500/10 border border-purple-500/20 text-purple-300 rounded-lg p-2 text-xs gap-2 min-w-0">
-                                    <span class="truncate whitespace-nowrap flex-1 min-w-0" x-text="p.display_name"></span>
-                                    <button @click="removePickerFromModal(p.id)" class="text-purple-400 hover:text-white transition-colors p-0.5 flex items-center justify-center shrink-0">
+                                <div class="flex items-center justify-between bg-purple-50 border border-purple-200 text-purple-900 rounded-lg p-2 text-xs gap-2 min-w-0 shadow-sm">
+                                    <span class="truncate whitespace-nowrap flex-1 min-w-0 font-semibold" x-text="p.display_name"></span>
+                                    <button @click="removePickerFromModal(p.id)" class="text-purple-600 hover:text-purple-900 transition-colors p-0.5 flex items-center justify-center shrink-0">
                                         <span x-html="document.getElementById('icono-eliminar').innerHTML"></span>
                                     </button>
                                 </div>
                             </template>
                             <template x-if="modalPickers.length === 0">
-                                <p class="text-[11px] text-white/20 italic text-center py-4">Ninguno</p>
+                                <p class="text-[11px] text-slate-400 font-medium italic text-center py-4">Ninguno</p>
                             </template>
                         </div>
                     </div>
                 </div>
 
                 {{-- Footer Fijo --}}
-                <div class="p-4 border-t border-white/[0.06] bg-zinc-900/40 shrink-0">
-                    <button @click="confirmSelection()" class="w-full bg-white text-zinc-950 font-medium py-2.5 rounded-xl text-xs hover:bg-white/90 transition-colors shadow-lg">Confirmar Selección</button>
+                <div class="p-4 border-t border-purple-100 bg-slate-50/50 shrink-0">
+                    <button @click="confirmSelection()" class="w-full bg-purple-600 text-white font-semibold py-2.5 rounded-xl text-xs hover:bg-purple-700 transition-colors shadow-md shadow-purple-600/20 cursor-pointer">Confirmar Selección</button>
                 </div>
             </div>
         </div>
 
         {{-- MODAL 1: AVISO PAGO PENDIENTE --}}
         <div x-show="showPaymentAlert" class="fixed inset-0 z-[100] flex items-center justify-center p-4" style="display: none;" role="dialog" aria-modal="true">
-            <div x-show="showPaymentAlert" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" class="fixed inset-0 bg-black/70 backdrop-blur-md" @click="showPaymentAlert = false"></div>
+            <div x-show="showPaymentAlert" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm" @click="showPaymentAlert = false"></div>
 
             <div x-show="showPaymentAlert" 
                  x-transition:enter="transition ease-out duration-200 transform" 
                  x-transition:enter-start="opacity-0 scale-95" 
                  x-transition:enter-end="opacity-100 scale-100" 
-                 class="relative w-full max-w-sm bg-zinc-900 border border-white/[0.08] rounded-2xl p-6 text-center shadow-2xl z-50">
+                 class="relative w-full max-w-sm bg-white border border-purple-200 rounded-2xl p-6 text-center shadow-2xl z-50">
 
-                <div class="mx-auto flex items-center justify-center h-14 w-14 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 mb-4">
-                    <i data-lucide="shield-alert" class="w-7 h-7" style="stroke-width:1.5"></i>
+                <div class="mx-auto flex items-center justify-center h-14 w-14 rounded-full bg-amber-50 border border-amber-200 text-amber-700 mb-4 shadow-sm">
+                    <i data-lucide="shield-alert" class="w-7 h-7" style="stroke-width:1.75"></i>
                 </div>
-                <h3 class="text-sm font-semibold text-white tracking-tight">Acción Bloqueada</h3>
-                <p class="text-xs text-white/50 mt-2 leading-relaxed">
+                <h3 class="text-sm font-bold text-slate-900 tracking-tight">Acción Bloqueada</h3>
+                <p class="text-xs font-medium text-slate-600 mt-2 leading-relaxed">
                     El Ticket aún no ha sido pagado, por favor revisar de forma interna antes de completar el pedido.
                 </p>
                 <div class="mt-5">
-                    <button @click="showPaymentAlert = false" class="w-full bg-white/[0.04] border border-white/[0.08] text-white/80 hover:text-white hover:bg-white/[0.08] font-medium py-2 rounded-xl text-xs transition-colors">Entendido, revisar</button>
+                    <button @click="showPaymentAlert = false" class="w-full bg-slate-100 border border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-200 font-semibold py-2 rounded-xl text-xs transition-colors shadow-sm">Entendido, revisar</button>
                 </div>
             </div>
         </div>
 
         {{-- MODAL 2: CONFIRMACIÓN PASO CRÍTICO A COMPLETADO --}}
         <div x-show="showCompletionConfirm" class="fixed inset-0 z-[100] flex items-center justify-center p-4" style="display: none;" role="dialog" aria-modal="true">
-            <div x-show="showCompletionConfirm" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" class="fixed inset-0 bg-black/70 backdrop-blur-md" @click="showCompletionConfirm = false"></div>
+            <div x-show="showCompletionConfirm" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm" @click="showCompletionConfirm = false"></div>
 
             <div x-show="showCompletionConfirm" 
                  x-transition:enter="transition ease-out duration-200 transform" 
                  x-transition:enter-start="opacity-0 scale-95" 
                  x-transition:enter-end="opacity-100 scale-100" 
-                 class="relative w-full max-w-sm bg-zinc-900 border border-white/[0.08] rounded-2xl p-6 text-center shadow-2xl z-50">
+                 class="relative w-full max-w-sm bg-white border border-purple-200 rounded-2xl p-6 text-center shadow-2xl z-50">
 
-                <div class="mx-auto flex items-center justify-center h-14 w-14 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 mb-4">
-                    <i data-lucide="check-circle-2" class="w-7 h-7" style="stroke-width:1.5"></i>
+                <div class="mx-auto flex items-center justify-center h-14 w-14 rounded-full bg-purple-50 border border-purple-200 text-purple-700 mb-4 shadow-sm">
+                    <i data-lucide="check-circle-2" class="w-7 h-7" style="stroke-width:1.75"></i>
                 </div>
-                <h3 class="text-sm font-semibold text-white tracking-tight">¿Cerrar Preparación de Ticket?</h3>
-                <p class="text-xs text-white/50 mt-2 leading-relaxed">
-                    Estás a punto de marcar este pedido como <span class="text-emerald-400 font-medium">COMPLETADO</span>. Esto liberará la dotación de pickers asignada y cerrará el flujo. ¿Proceder?
+                <h3 class="text-sm font-bold text-slate-900 tracking-tight">¿Cerrar Preparación de Ticket?</h3>
+                <p class="text-xs font-medium text-slate-600 mt-2 leading-relaxed">
+                    Estás a punto de marcar este pedido como <span class="text-emerald-600 font-bold">COMPLETADO</span>. Esto liberará la dotación de pickers asignada y cerrará el flujo. ¿Proceder?
                 </p>
                 <div class="grid grid-cols-2 gap-3 mt-6">
-                    <button @click="showCompletionConfirm = false" class="w-full bg-white/[0.02] border border-white/[0.06] text-white/60 hover:text-white hover:bg-white/[0.04] font-medium py-2.5 rounded-xl text-xs transition-colors">Aún no</button>
-                    <button @click="executeCompletion()" class="w-full bg-emerald-500 text-zinc-950 hover:bg-emerald-400 font-semibold py-2.5 rounded-xl text-xs transition-colors shadow-lg shadow-emerald-500/10">Sí, Completar</button>
+                    <button @click="showCompletionConfirm = false" class="w-full bg-slate-100 border border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-200 font-semibold py-2.5 rounded-xl text-xs transition-colors shadow-sm">Aún no</button>
+                    <button @click="executeCompletion()" class="w-full bg-emerald-600 text-white hover:bg-emerald-700 font-semibold py-2.5 rounded-xl text-xs transition-colors shadow-md shadow-emerald-600/20 cursor-pointer">Sí, Completar</button>
                 </div>
             </div>
         </div>
@@ -353,19 +347,19 @@
   @else
     {{-- VISTA ERROR CONTROLADO --}}
     <div class="mb-6 flex items-center gap-3">
-      <a href="{{ route('tickets.index') }}" class="flex items-center gap-1.5 text-white/35 hover:text-white/70 text-sm transition-colors"><i data-lucide="arrow-left" class="w-4 h-4" style="stroke-width:1.5"></i>Volver al listado</a>
+      <a href="{{ route('tickets.index') }}" class="flex items-center gap-1.5 text-slate-500 hover:text-slate-900 text-sm font-medium transition-colors"><i data-lucide="arrow-left" class="w-4 h-4" style="stroke-width:1.75"></i>Volver al listado</a>
     </div>
-    <div class="flex flex-col items-center justify-center min-h-[45vh] text-center border border-dashed border-white/[0.06] rounded-xl p-8 bg-gray-900/20">
-      <i data-lucide="frown" class="w-12 h-12 text-white/20 mb-4" style="stroke-width:1.2"></i>
-      <h2 class="text-base font-medium text-white/80">Ticket no existe</h2>
+    <div class="flex flex-col items-center justify-center min-h-[45vh] text-center border border-dashed border-purple-200 rounded-xl p-8 bg-white shadow-sm">
+      <i data-lucide="frown" class="w-12 h-12 text-slate-400 mb-4" style="stroke-width:1.5"></i>
+      <h2 class="text-base font-bold text-slate-800">Ticket no existe</h2>
     </div>
   @endif
 
   <style>
       .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-      .custom-scrollbar::-webkit-scrollbar-track { bg: transparent; }
-      .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.05); border-radius: 10px; }
-      .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.1); }
+      .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+      .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(168, 85, 247, 0.2); border-radius: 10px; }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(168, 85, 247, 0.4); }
   </style>
 
 @endsection

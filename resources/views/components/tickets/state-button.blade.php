@@ -4,18 +4,18 @@
     <button @click="if (status !== 'COMPLETADO') showStatusDropdown = !showStatusDropdown" 
             @click.away="showStatusDropdown = false"
             :disabled="status === 'COMPLETADO'"
-            class="flex items-center justify-between w-36 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors"
+            class="flex items-center justify-between w-36 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-colors shadow-sm"
             :class="{
-                'bg-amber-500/10 border-amber-500/30 text-amber-400': status === 'PENDIENTE',
-                'bg-blue-500/10 border-blue-500/30 text-blue-400': status === 'PREPARANDO',
-                'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 cursor-not-allowed': status === 'COMPLETADO'
+                'bg-amber-50 border-amber-300 text-amber-800': status === 'PENDIENTE',
+                'bg-purple-50 border-purple-300 text-purple-800': status === 'PREPARANDO',
+                'bg-emerald-50 border-emerald-300 text-emerald-800 cursor-not-allowed': status === 'COMPLETADO'
             }">
         <div class="flex items-center gap-2">
             <span class="w-1.5 h-1.5 rounded-full"
                     :class="{
-                        'bg-amber-400 animate-pulse': status === 'PENDIENTE',
-                        'bg-blue-400 animate-pulse': status === 'PREPARANDO',
-                        'bg-emerald-400': status === 'COMPLETADO'
+                        'bg-amber-500 animate-pulse': status === 'PENDIENTE',
+                        'bg-purple-600 animate-pulse': status === 'PREPARANDO',
+                        'bg-emerald-600': status === 'COMPLETADO'
                     }"></span>
             <span x-text="status"></span>
         </div>
@@ -26,10 +26,10 @@
             x-transition:enter="transition ease-out duration-100"
             x-transition:enter-start="transform opacity-0 scale-95"
             x-transition:enter-end="transform opacity-100 scale-100"
-            class="absolute right-0 mt-2 w-36 rounded-xl bg-zinc-950 border border-white/[0.08] shadow-2xl p-1 z-50"
+            class="absolute right-0 mt-2 w-36 rounded-xl bg-white border border-purple-200 shadow-xl p-1 z-50"
             style="display: none;">
-        <button @click="changeStatus('PENDIENTE')" class="w-full text-left px-3 py-2 rounded-lg text-xs text-amber-400 hover:bg-white/[0.03] transition-colors">PENDIENTE</button>
-        <button @click="changeStatus('PREPARANDO')" class="w-full text-left px-3 py-2 rounded-lg text-xs text-blue-400 hover:bg-white/[0.03] transition-colors">PREPARANDO</button>
-        <button @click="changeStatus('COMPLETADO')" class="w-full text-left px-3 py-2 rounded-lg text-xs text-emerald-400 hover:bg-white/[0.03] transition-colors">COMPLETADO</button>
+        <button @click="changeStatus('PENDIENTE')" class="w-full text-left px-3 py-2 rounded-lg text-xs font-semibold text-amber-800 hover:bg-amber-50 transition-colors">PENDIENTE</button>
+        <button @click="changeStatus('PREPARANDO')" class="w-full text-left px-3 py-2 rounded-lg text-xs font-semibold text-purple-800 hover:bg-purple-50 transition-colors">PREPARANDO</button>
+        <button @click="changeStatus('COMPLETADO')" class="w-full text-left px-3 py-2 rounded-lg text-xs font-semibold text-emerald-800 hover:bg-emerald-50 transition-colors">COMPLETADO</button>
     </div>
 </div>
