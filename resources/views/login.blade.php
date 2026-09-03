@@ -89,7 +89,7 @@
     </div>
 
     <footer class="mt-4 text-slate-500 text-xs font-medium tracking-wide">
-        Sistema Picking Pfau {{ date('Y') }}
+        <strong>©</strong> Sistema Picking Pfau {{ date('Y') }}
     </footer>
 
     <script>
