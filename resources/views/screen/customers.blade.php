@@ -7,24 +7,25 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
         :root {
-            /* Colores de Fondo y Bordes con matices morados */
+            /* Colores de Fondo y Bordes con acento morado más visible */
             --color-bg-body: #f8fafc;
             --color-bg-card: #ffffff;
-            --color-bg-row-alt: rgba(243, 232, 255, 0.35); /* Morado muy sutil para filas alternas */
-            --color-border: #e9d5ff; /* Morado suave (purple-200) */
+            --color-bg-row-alt: rgba(233, 213, 255, 0.45); /* Interlineado moradito más notorio */
+            --color-border: #c084fc; /* Líneas de borde en morado más vivo (purple-400) */
 
             /* Colores de Tipografía */
             --color-text-main: #0f172a;
             --color-text-muted: #64748b;
             --color-text-ticket: #334155;
             --color-text-badge: #ffffff;
+            --color-title: #9333ea; /* Título principal en morado */
 
             /* Tipografías */
             --font-family-base: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             --font-family-badge: 'Arial Narrow', 'Franklin Gothic Medium', sans-serif;
 
             /* Tamaños de Fuente Relativos */
-            --font-size-title: 3vh;
+            --font-size-title: 3.2vh;
             --font-size-header: 2.4vh;
             --font-size-client: 3.5vh;
             --font-size-ticket: 4.8vh;
@@ -37,7 +38,7 @@
             --container-radius: 1rem;
             --grid-columns-layout: 2.5fr 0.8fr 1.3fr 0.5fr;
             --grid-padding-x: 2vw;
-            --badge-width: 120px; /* Más compacto de ancho */
+            --badge-width: 120px;
             --badge-padding-y: 0.5vh;
             --badge-radius: 0.5rem;
         }
@@ -65,9 +66,9 @@
             height: 100%;
             max-width: var(--container-max-width);
             background-color: var(--color-bg-card);
-            border: 1px solid var(--color-border);
+            border: 2px solid var(--color-border);
             border-radius: var(--container-radius);
-            box-shadow: 0 10px 25px -5px rgba(168, 85, 247, 0.08), 0 8px 10px -6px rgba(168, 85, 247, 0.05);
+            box-shadow: 0 15px 30px -5px rgba(147, 51, 234, 0.15);
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -75,17 +76,18 @@
 
         .screen-header {
             flex-shrink: 0;
-            background-color: var(--color-bg-card);
+            background-color: #faf5ff;
             border-bottom: 2px solid var(--color-border);
             padding: 1.2vh var(--grid-padding-x);
             text-align: center;
         }
 
         .screen-title {
-            color: var(--color-text-main);
+            color: var(--color-title);
             font-size: var(--font-size-title);
-            font-weight: 800;
-            letter-spacing: 0.05em;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-shadow: 0 1px 2px rgba(147, 51, 234, 0.1);
         }
 
         .columns-header {
@@ -94,14 +96,14 @@
             grid-template-columns: var(--grid-columns-layout);
             align-items: center;
             padding: 1vh var(--grid-padding-x);
-            border-bottom: 1px solid var(--color-border);
-            background-color: #faf5ff; /* Fondo morado ultra claro */
+            border-bottom: 2px solid var(--color-border);
+            background-color: #f3e8ff; /* Fondo morado claro para cabecera de tabla */
         }
 
         .column-label {
-            color: var(--color-text-muted);
+            color: #581c87;
             font-size: var(--font-size-header);
-            font-weight: 700;
+            font-weight: 800;
             letter-spacing: 0.05em;
         }
 
@@ -126,7 +128,7 @@
             align-items: center;
             padding: 0 var(--grid-padding-x);
             background-color: transparent;
-            border-bottom: 1px solid var(--color-border);
+            border-bottom: 1.5px solid var(--color-border);
         }
 
         .order-row-alt {
@@ -167,7 +169,7 @@
             justify-content: flex-end;
         }
 
-        /* Badges con degradado, borde sólido más oscuro y más compactos */
+        /* Widgets/Badges con estilo de botón degradado y bordes sólidos notorios */
         .status-badge {
             font-family: var(--font-family-badge);
             color: var(--color-text-badge);
@@ -183,22 +185,22 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 2px 4px rgba(0, 0, 0, 0.1);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 3px 6px rgba(0, 0, 0, 0.12);
         }
 
         .badge-pending {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-            border: 1.5px solid #b45309;
+            background: linear-gradient(135deg, #fbbf24, #d97706);
+            border: 2px solid #b45309;
         }
 
         .badge-progress {
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
-            border: 1.5px solid #1d4ed8;
+            background: linear-gradient(135deg, #60a5fa, #2563eb);
+            border: 2px solid #1d4ed8;
         }
 
         .badge-pagar {
-            background: linear-gradient(135deg, #10b981, #059669);
-            border: 1.5px solid #047857;
+            background: linear-gradient(135deg, #34d399, #059669);
+            border: 2px solid #047857;
         }
     </style>
 </head>
