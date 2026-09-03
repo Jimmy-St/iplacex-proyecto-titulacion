@@ -7,22 +7,17 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
         :root {
-            /* Colores de Fondo y Bordes */
-            --color-bg-body: #0f172a;
-            --color-bg-card: #0f172a;
-            --color-bg-row-alt: rgba(30, 41, 59, 0.4);
-            --color-border: #334155;
+            /* Colores de Fondo y Bordes con matices morados */
+            --color-bg-body: #f8fafc;
+            --color-bg-card: #ffffff;
+            --color-bg-row-alt: rgba(243, 232, 255, 0.35); /* Morado muy sutil para filas alternas */
+            --color-border: #e9d5ff; /* Morado suave (purple-200) */
 
             /* Colores de Tipografía */
-            --color-text-main: #fffbeb;
-            --color-text-muted: #94a3b8;
-            --color-text-ticket: #cbd5e1;
+            --color-text-main: #0f172a;
+            --color-text-muted: #64748b;
+            --color-text-ticket: #334155;
             --color-text-badge: #ffffff;
-
-            /* Colores de Estado */
-            --color-status-pending: #E8890C;
-            --color-status-progress: #2255D6;
-            --color-status-completed: #0F9D58;
 
             /* Tipografías */
             --font-family-base: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
@@ -34,17 +29,17 @@
             --font-size-client: 3.5vh;
             --font-size-ticket: 4.8vh;
             --font-size-picker: 3.2vh;
-            --font-size-badge: 2.6vh;
+            --font-size-badge: 2.2vh;
 
             /* Espaciados y Dimensiones */
-            --body-padding: 1vh;
+            --body-padding: 1.5vh;
             --container-max-width: 1900px;
             --container-radius: 1rem;
             --grid-columns-layout: 2.5fr 0.8fr 1.3fr 0.5fr;
             --grid-padding-x: 2vw;
-            --badge-width: 140px;
-            --badge-padding-y: 0.4vh;
-            --badge-radius: 0.375rem;
+            --badge-width: 120px; /* Más compacto de ancho */
+            --badge-padding-y: 0.5vh;
+            --badge-radius: 0.5rem;
         }
 
         * {
@@ -64,6 +59,7 @@
             justify-content: center;
             padding: var(--body-padding);
         }
+
         .screen-container {
             width: 100%;
             height: 100%;
@@ -71,7 +67,7 @@
             background-color: var(--color-bg-card);
             border: 1px solid var(--color-border);
             border-radius: var(--container-radius);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            box-shadow: 0 10px 25px -5px rgba(168, 85, 247, 0.08), 0 8px 10px -6px rgba(168, 85, 247, 0.05);
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -80,8 +76,8 @@
         .screen-header {
             flex-shrink: 0;
             background-color: var(--color-bg-card);
-            border-bottom: 1px solid var(--color-border);
-            padding: 0.4vh var(--grid-padding-x);
+            border-bottom: 2px solid var(--color-border);
+            padding: 1.2vh var(--grid-padding-x);
             text-align: center;
         }
 
@@ -97,8 +93,9 @@
             display: grid;
             grid-template-columns: var(--grid-columns-layout);
             align-items: center;
-            padding: 0.6vh var(--grid-padding-x);
+            padding: 1vh var(--grid-padding-x);
             border-bottom: 1px solid var(--color-border);
+            background-color: #faf5ff; /* Fondo morado ultra claro */
         }
 
         .column-label {
@@ -118,6 +115,8 @@
             display: flex;
             flex-direction: column;
             min-height: 0;
+            gap: 0.8vh;
+            padding: 1vh 0;
         }
 
         .order-row {
@@ -127,6 +126,7 @@
             align-items: center;
             padding: 0 var(--grid-padding-x);
             background-color: transparent;
+            border-bottom: 1px solid var(--color-border);
         }
 
         .order-row-alt {
@@ -147,13 +147,14 @@
         .cell-ticket {
             color: var(--color-text-ticket);
             font-size: var(--font-size-ticket);
-            font-weight: 700;
+            font-weight: 800;
+            font-family: monospace;
         }
 
         .cell-picker {
             color: var(--color-text-main);
             font-size: var(--font-size-picker);
-            font-weight: 800;
+            font-weight: 700;
             text-transform: uppercase;
             white-space: nowrap;
             overflow: hidden;
@@ -166,6 +167,7 @@
             justify-content: flex-end;
         }
 
+        /* Badges con degradado, borde sólido más oscuro y más compactos */
         .status-badge {
             font-family: var(--font-family-badge);
             color: var(--color-text-badge);
@@ -181,19 +183,22 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .badge-pending {
-            background-color: var(--color-status-pending);
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            border: 1.5px solid #b45309;
         }
 
         .badge-progress {
-            background-color: var(--color-status-progress);
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            border: 1.5px solid #1d4ed8;
         }
 
-        .badge-completed {
-            background-color: var(--color-status-completed);
+        .badge-pagar {
+            background: linear-gradient(135deg, #10b981, #059669);
+            border: 1.5px solid #047857;
         }
     </style>
 </head>
@@ -203,6 +208,7 @@
         <header class="screen-header">
             <h1 class="screen-title">ESTADO DE PEDIDOS CLIENTES</h1>
         </header>
+        
         {{-- Encabezado de columnas --}}
         <div class="columns-header">
             <span class="column-label">CLIENTE</span>
@@ -212,6 +218,7 @@
                 <span class="column-label column-label-status">ESTADO</span>
             </div>
         </div>
+
         {{-- Filas dinámicas obtenidas desde la API --}}
         <div class="rows-container">
             <template x-for="(pedido, index) in pedidos" :key="pedido.ticket ?? index">
@@ -229,7 +236,6 @@
                 </div>
             </template>
         </div>
-
     </div>
 
     <script>
@@ -237,22 +243,22 @@
             Alpine.data('pedidosApp', () => ({
                 pedidos: [],
                 statusMap: {
-                    'pending': { label: 'PENDIENTE', class: 'badge-pending' },
-                    'pendiente': { label: 'PENDIENTE', class: 'badge-pending' },
-                    'pend': { label: 'PENDIENTE', class: 'badge-pending' },
+                    'pending': { label: 'PEND.', class: 'badge-pending' },
+                    'pendiente': { label: 'PEND.', class: 'badge-pending' },
+                    'pend': { label: 'PEND.', class: 'badge-pending' },
                     
-                    'in_progress': { label: 'PREPARANDO', class: 'badge-progress' },
-                    'preparando': { label: 'PREPARANDO', class: 'badge-progress' },
-                    'prog': { label: 'PREPARANDO', class: 'badge-progress' },
+                    'in_progress': { label: 'PREP.', class: 'badge-progress' },
+                    'preparando': { label: 'PREP.', class: 'badge-progress' },
+                    'prog': { label: 'PREP.', class: 'badge-progress' },
                     
-                    'completed': { label: 'COMPLETADO', class: 'badge-completed' },
-                    'completado': { label: 'COMPLETADO', class: 'badge-completed' },
-                    'comp': { label: 'COMPLETADO', class: 'badge-completed' }
+                    'completed': { label: 'PAGAR', class: 'badge-pagar' },
+                    'completado': { label: 'PAGAR', class: 'badge-pagar' },
+                    'comp': { label: 'PAGAR', class: 'badge-pagar' }
                 },
                 getStatusConfig(status) {
                     const key = String(status || '').toLowerCase().trim();
                     return this.statusMap[key] || { 
-                        label: (status || 'PENDIENTE').toUpperCase(), 
+                        label: (status || 'PEND.').toUpperCase(), 
                         class: 'badge-pending' 
                     };
                 },
@@ -286,6 +292,5 @@
             }));
         });
     </script>
-
 </body>
 </html>
