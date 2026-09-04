@@ -150,13 +150,22 @@
         {{-- LAYOUT SUPERIOR (2 Secciones) --}}
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
 
-            {{-- SECCIÓN 1: DATOS DEL TICKET --}}
-            <div class="lg:col-span-2 bg-white border border-purple-200 rounded-xl p-5 flex flex-col justify-between gap-y-5 shadow-sm">
+            {{-- SECCIÓN 1: DATOS DEL TICKET & CLIENTE --}}
+            <div class="lg:col-span-2 bg-white border border-purple-200 rounded-xl p-6 flex flex-col justify-between gap-y-6 shadow-sm">
+                
+                {{-- Fila Superior: Número de Ticket, Cliente y Estado --}}
                 <div class="flex flex-wrap justify-between items-start gap-4">
-                    <div class="flex items-start gap-4">
+                    <div class="space-y-3">
                         <div>
                             <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Número de Ticket</p>
-                            <h1 class="text-xl font-bold text-slate-900 tracking-tight">#{{ $ticket->ticket_number }}</h1>
+                            <h1 class="text-3xl font-bold text-slate-900 tracking-tight">#{{ $ticket->ticket_number }}</h1>
+                        </div>
+
+                        {{-- Datos del Cliente --}}
+                        <div class="flex items-center gap-2 bg-purple-50/60 border border-purple-100 rounded-lg px-3 py-1.5 w-fit">
+                            <i data-lucide="circle-dollar-sign" class="w-5 h-5 text-purple-600 shrink-0" style="stroke-width:1.75"></i>
+                            <span class="text-sm font-bold text-slate-800 uppercase">Monto Total:</span>
+                            <span class="text-sm font-bold text-purple-900">$ {{ $ticket->total_amount ?? ' ' }}</span>
                         </div>
                     </div>
 
@@ -164,54 +173,84 @@
                     <x-tickets.state-button :ticket="$ticket" />
                 </div>
 
-                {{-- Detalles Inferiores Originales --}}
+                {{-- Bloque de Tiempos (Inicio a la izquierda, Despacho a la derecha) --}}
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50/70 border border-purple-100 rounded-xl p-3.5">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 bg-purple-100/70 text-purple-700 rounded-lg shrink-0">
+                            <i data-lucide="play-circle" class="w-5 h-5" style="stroke-width:1.75"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Inicio (Creación)</p>
+                            <p class="text-xs font-bold text-slate-800 font-mono mt-0.5">
+                                {{ $ticket->created_at ? $ticket->created_at->format('d-m-Y H:i') : '—' }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3 sm:border-l sm:border-purple-200 sm:pl-3">
+                        <div class="p-2 bg-emerald-100/70 text-emerald-700 rounded-lg shrink-0">
+                            <i data-lucide="check-circle-2" class="w-5 h-5" style="stroke-width:1.75"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Despacho / Término</p>
+                            <p class="text-xs font-bold font-mono mt-0.5" :class="status === 'COMPLETADO' ? 'text-emerald-700' : 'text-slate-400 italic'">
+                                <span x-text="status === 'COMPLETADO' ? '{{ optional($ticket->updated_at)->format('d-m-Y H:i') ?? now()->format('d-m-Y H:i') }}' : 'En proceso'"></span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Detalles Inferiores Organizados --}}
                 <div class="flex items-center justify-between pt-3 border-t border-slate-100">
                     <div class="flex items-center gap-8">
                         <div>
-                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Monto Total</p>
-                            <p class="text-base font-bold text-slate-900">${{ number_format($ticket->total_amount, 0, ',', '.') }}</p>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Cliente</p>
+                            <p class="text-sm font-medium text-slate-700 max-w-[250px] truncate">{{ $ticket->customer ?? '—' }}</p>
+                        </div>                        
+                        <div>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Vendedor</p>
+                            <p class="text-sm font-medium text-slate-700 max-w-[250px] truncate">{{ $ticket->seller ?? '—' }}</p>
                         </div>
                         <div>
-                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Vendedor (Seller)</p>
-                            <p class="text-sm font-medium text-slate-700 max-w-[150px] truncate">{{ $ticket->seller ?? '—' }}</p>
-                        </div>
-                        <div>
-                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Canal de Origen</p>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Canal</p>
                             <p class="text-sm font-medium text-slate-700">Venta Digital</p>
                         </div>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Actualizado</p>
-                        <p class="text-sm text-slate-600 font-mono font-medium">{{ $ticket->updated_at ? $ticket->updated_at->format('d-m-Y H:i') : '—' }}</p>
                     </div>
                 </div>
             </div>
 
             {{-- SECCIÓN 2: ASIGNACIÓN DE PICKERS --}}
-            <div class="bg-white border border-purple-200 rounded-xl p-5 flex flex-col justify-between min-h-[140px] shadow-sm">
-                <div class="flex justify-between items-start mb-2">
-                    <div>
-                        <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Pickers Asignados</p>
-                        <p class="text-xs font-semibold text-slate-700" x-text="assignedPickers.length + ' / 5 Operadores'"></p>
+            <div class="bg-white border border-purple-200 rounded-xl p-5 flex flex-col justify-between shadow-sm">
+                <div class="space-y-4">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Pickers Asignados</p>
+                            <p class="text-xs font-semibold text-slate-700" x-text="assignedPickers.length + ' / 5 Operadores'"></p>
+                        </div>
                     </div>
 
+                    {{-- Botón de Selección de Pickers Ancho, Colorido y en Dos Líneas --}}
                     <button @click="openModal()" 
                             :disabled="status === 'COMPLETADO'"
-                            class="p-2 rounded-xl border transition-all flex items-center justify-center shadow-sm"
-                            :class="status === 'COMPLETADO' ? 'bg-slate-50 border-slate-200 text-slate-300 cursor-not-allowed' : (assignedPickers.length === 0 ? 'bg-slate-50 border-purple-200 text-slate-400 hover:text-purple-600' : 'bg-purple-50 border-purple-300 text-purple-700')">
-                        <i data-lucide="user" x-show="assignedPickers.length === 0" class="w-5 h-5" style="stroke-width:1.75"></i>
-                        <i data-lucide="user-check" x-show="assignedPickers.length === 1" class="w-5 h-5" style="stroke-width:1.75" style="display: none;"></i>
-                        <i data-lucide="users" x-show="assignedPickers.length > 1" class="w-5 h-5" style="stroke-width:1.75" style="display: none;"></i>
+                            class="w-full py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-3 shadow-md cursor-pointer"
+                            :class="status === 'COMPLETADO' 
+                                ? 'bg-slate-100 border border-slate-200 text-slate-400 cursor-not-allowed shadow-none' 
+                                : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-purple-600/20'">
+                        <i data-lucide="users" class="w-7 h-7 shrink-0" style="stroke-width:2"></i>
+                        <div class="text-left leading-tight">
+                            <span class="block text-[10px] font-bold uppercase tracking-wider opacity-90">SELECCIÓN</span>
+                            <span class="block text-sm font-extrabold tracking-wide">PICKERS</span>
+                        </div>
                     </button>
                 </div>
 
-                {{-- Tags Exteriores --}}
-                <div class="flex flex-wrap gap-1.5 mt-2">
+                {{-- Listado de Operadores (Tipografía ligeramente más grande) --}}
+                <div class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-slate-100">
                     <template x-if="assignedPickers.length === 0">
                         <span class="text-xs text-slate-400 italic py-1 font-medium">Sin personal asignado</span>
                     </template>
                     <template x-for="p in assignedPickers" :key="p.id">
-                        <span class="inline-flex items-center bg-purple-50 border border-purple-200 rounded-lg px-2.5 py-0.5 text-[11px] font-semibold text-purple-800 max-w-[140px]">
+                        <span class="inline-flex items-center bg-purple-50 border border-purple-200 rounded-lg px-3 py-1 text-xs font-bold text-purple-900 shadow-sm">
                             <span class="truncate whitespace-nowrap" x-text="p.display_name"></span>
                         </span>
                     </template>
