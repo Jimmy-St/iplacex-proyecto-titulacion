@@ -13,20 +13,17 @@ class ReportesController extends Controller
 {
     public function index(Request $request)
     {
-        // 1. Capturar la fecha del request o usar la de hoy por defecto
         $fecha = $request->input('fecha', date('Y-m-d'));
 
-        // 2. KPIs Globales usando filtros de fecha nativos robustos
+        // KPIs Globales
         $totalTickets = Ticket::whereDate('created_at', $fecha)->count();
-
         $tareasDia = PickingTask::whereDate('created_at', $fecha)->get();
 
-        // Desglose de estados operativos
         $pendientes = $tareasDia->where('status', 'PENDIENTE')->count();
         $enProceso = $tareasDia->where('status', 'PREPARANDO')->count();
         $completados = $tareasDia->where('status', 'COMPLETADO')->count();
 
-        // 3. Tiempo Promedio de Ciclo: Solo tareas creadas y completadas el mismo día seleccionado
+        // Tiempo Promedio de Ciclo
         $tareasCompletadasHoy = PickingTask::where('status', 'COMPLETADO')
             ->whereDate('updated_at', $fecha)
             ->get();
@@ -51,24 +48,21 @@ class ReportesController extends Controller
             ? round($tiempoTotalMinutos / $cantidadConTiempo, 1)
             : 0;
 
-        // 4. Desempeño por Picker
+        // Desempeño por Picker con Nombre + Apellido Completo
         $pickers = Picker::all();
 
         $rendimientoPickers = $pickers->map(function ($picker) use ($fecha) {
-
             $asignaciones = DB::table('picking_assignments')
                 ->join('picking_tasks', 'picking_assignments.picking_task_id', '=', 'picking_tasks.id')
                 ->where('picking_assignments.picker_id', $picker->id)
                 ->select('picking_tasks.*')
                 ->get();
 
-            // Filtrar tareas completadas en la fecha seleccionada
             $completadasPicker = $asignaciones->filter(function ($task) use ($fecha) {
                 $fechaActualizacion = $task->updated_at ? Carbon::parse($task->updated_at)->toDateString() : null;
                 return $task->status === 'COMPLETADO' && $fechaActualizacion === $fecha;
             });
 
-            // Tiempo promedio individual del picker (restringido al mismo día)
             $tMinutos = 0;
             $tCount = 0;
             foreach ($completadasPicker as $task) {
@@ -82,8 +76,6 @@ class ReportesController extends Controller
                 }
             }
             $promedioPicker = $tCount > 0 ? round($tMinutos / $tCount, 1) : 0;
-
-            // Carga actual (tareas que NO están completadas)
             $cargaActual = $asignaciones->where('status', '!=', 'COMPLETADO')->count();
 
             if ($cargaActual > 0) {
@@ -94,8 +86,14 @@ class ReportesController extends Controller
                 $badgeClase = "bg-emerald-500/15 text-emerald-400 border-emerald-500/25";
             }
 
+            // Nombre y Apellido completo formal
+            $nombreCompleto = trim(($picker->first_name ?? '') . ' ' . ($picker->last_name ?? ''));
+            if (empty($nombreCompleto)) {
+                $nombreCompleto = $picker->display_name ?? 'SIN NOMBRE';
+            }
+
             return [
-                'display_name' => $picker->display_name ?? ($picker->first_name . ' ' . $picker->last_name),
+                'display_name' => $nombreCompleto,
                 'employee_code' => $picker->employee_code,
                 'zone_assigned' => $picker->zone_assigned ?? 'General',
                 'completados' => $completadasPicker->count(),
@@ -105,7 +103,6 @@ class ReportesController extends Controller
             ];
         });
 
-        // Formatear la fecha para mostrarla limpiamente en la vista (DD-MM-YYYY)
         $fechaFormateada = Carbon::parse($fecha)->format('d-m-Y');
 
         return view('reportes.index', compact(
@@ -125,7 +122,6 @@ class ReportesController extends Controller
         $fecha = $request->input('fecha', date('Y-m-d'));
         $fileName = "reporte-picking-{$fecha}.csv";
 
-        // Obtener tickets de la fecha junto con su tarea de picking y pickers asociados
         $tickets = Ticket::with(['pickingTask.pickers'])
             ->whereDate('created_at', $fecha)
             ->get();
@@ -141,28 +137,44 @@ class ReportesController extends Controller
         $callback = function () use ($tickets) {
             $file = fopen('php://output', 'w');
 
-            // Añadir BOM para correcta lectura de tildes en Excel
+            // UTF-8 BOM para soporte correcto en Excel
             fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
-            // Cabeceras del Excel / CSV
-            fputcsv($file, ['NRO TICKET', 'CLIENTE', 'VENDEDOR', 'MONTO', 'ESTADO', 'PICKERS ASIGNADOS', 'HORA INICIO', 'HORA TERMINO / PROCESO'], ';');
+            // Cabeceras solicitadas exactamente
+            fputcsv($file, [
+                'TICKET',
+                'CLIENTE',
+                'VENDEDOR',
+                'MONTO',
+                'ESTADO',
+                'PICKERS',
+                'INICIO',
+                'FIN',
+                'TIEMPO'
+            ], ';');
 
             foreach ($tickets as $ticket) {
                 $task = $ticket->pickingTask;
                 $estado = $task ? $task->status : 'PENDIENTE';
 
-                // Extraer nombres de pickers asignados
+                // Nombre completo (Nombre + Apellido) para los pickers
                 $pickersStr = 'SIN ASIGNAR';
                 if ($task && $task->pickers && $task->pickers->count() > 0) {
-                    $pickersStr = $task->pickers->pluck('display_name')->implode(', ');
+                    $nombres = $task->pickers->map(function ($p) {
+                        $full = trim(($p->first_name ?? '') . ' ' . ($p->last_name ?? ''));
+                        return !empty($full) ? $full : ($p->display_name ?? 'Picker');
+                    });
+                    $pickersStr = $nombres->implode(', ');
                 }
 
-                $horaInicio = $ticket->created_at ? $ticket->created_at->format('d-m-Y H:i:s') : '—';
+                $horaInicio = $ticket->created_at ? $ticket->created_at->format('d-m-Y H:i') : '—';
 
                 if ($estado === 'COMPLETADO' && $task && $task->updated_at) {
-                    $horaTermino = $task->updated_at->format('d-m-Y H:i:s');
+                    $horaFin = $task->updated_at->format('d-m-Y H:i');
+                    $minutosUsados = $ticket->created_at ? $ticket->created_at->diffInMinutes($task->updated_at) . ' min' : '—';
                 } else {
-                    $horaTermino = 'En proceso';
+                    $horaFin = 'En proceso';
+                    $minutosUsados = '—';
                 }
 
                 fputcsv($file, [
@@ -173,7 +185,8 @@ class ReportesController extends Controller
                     $estado,
                     $pickersStr,
                     $horaInicio,
-                    $horaTermino
+                    $horaFin,
+                    $minutosUsados
                 ], ';');
             }
 

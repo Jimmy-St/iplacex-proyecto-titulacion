@@ -194,7 +194,7 @@
                         <div>
                             <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Despacho / Término</p>
                             <p class="text-xs font-bold font-mono mt-0.5" :class="status === 'COMPLETADO' ? 'text-emerald-700' : 'text-slate-400 italic'">
-                                <span x-text="status === 'COMPLETADO' ? '{{ optional($ticket->updated_at)->format('d-m-Y H:i') ?? now()->format('d-m-Y H:i') }}' : 'En proceso'"></span>
+                                <span x-text="status === 'COMPLETADO' ? '{{ optional($ticket->pickingTask?->updated_at)->format('d-m-Y H:i') ?? now()->format('d-m-Y H:i') }}' : 'En proceso'"></span>
                             </p>
                         </div>
                     </div>
