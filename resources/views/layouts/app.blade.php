@@ -13,15 +13,15 @@
   <!-- Barra lateral (Sidebar en modo claro) -->
   <aside class="hidden md:flex flex-col fixed inset-y-0 left-0 w-56 bg-white border-r border-purple-100">
 
-    <div class="h-14 flex items-center gap-2.5 px-4 border-b border-purple-100">
-      <!-- Ícono de la caja -->
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-purple-600 shrink-0">
-        <path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/>
-        <path d="M12 22V12"/>
-        <polyline points="3.29 7 12 12 20.71 7"/>
-        <path d="m7.5 4.27 9 5.15"/>
-      </svg>
-      <span class="font-bold text-sm tracking-widest uppercase text-slate-900">Gestión</span>
+    <div class="h-24 flex flex-col justify-center items-center gap-1 px-4 border-b border-purple-100">
+        <!-- Ícono de la caja más grande -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.0" stroke-linecap="round" stroke-linejoin="round" class="w-9 h-9 text-purple-600 shrink-0">
+            <path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/>
+            <path d="M12 22V12"/>
+            <polyline points="3.29 7 12 12 20.71 7"/>
+            <path d="m7.5 4.27 9 5.15"/>
+        </svg>
+        <span class="font-bold text-xs tracking-widest uppercase text-slate-900">Gestión Picking</span>
     </div>
 
     <nav class="flex-1 py-4 px-3 flex flex-col gap-1.5">
