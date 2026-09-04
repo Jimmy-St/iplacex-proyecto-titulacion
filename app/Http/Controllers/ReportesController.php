@@ -140,7 +140,7 @@ class ReportesController extends Controller
             // UTF-8 BOM para soporte correcto en Excel
             fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
-            // Cabeceras solicitadas exactamente
+            // Cabeceras exactas solicitadas
             fputcsv($file, [
                 'TICKET',
                 'CLIENTE',
@@ -150,14 +150,14 @@ class ReportesController extends Controller
                 'PICKERS',
                 'INICIO',
                 'FIN',
-                'TIEMPO'
+                'TIEMPO (min)'
             ], ';');
 
             foreach ($tickets as $ticket) {
                 $task = $ticket->pickingTask;
                 $estado = $task ? $task->status : 'PENDIENTE';
 
-                // Nombre completo (Nombre + Apellido) para los pickers
+                // Nombres completos de los pickers
                 $pickersStr = 'SIN ASIGNAR';
                 if ($task && $task->pickers && $task->pickers->count() > 0) {
                     $nombres = $task->pickers->map(function ($p) {
@@ -171,17 +171,21 @@ class ReportesController extends Controller
 
                 if ($estado === 'COMPLETADO' && $task && $task->updated_at) {
                     $horaFin = $task->updated_at->format('d-m-Y H:i');
-                    $minutosUsados = $ticket->created_at ? $ticket->created_at->diffInMinutes($task->updated_at) . ' min' : '—';
+                    // Tiempo redondeado sin letras, solo número entero
+                    $minutosUsados = $ticket->created_at ? round($ticket->created_at->diffInMinutes($task->updated_at)) : '';
                 } else {
                     $horaFin = 'En proceso';
-                    $minutosUsados = '—';
+                    $minutosUsados = '';
                 }
+
+                // Monto con símbolo $
+                $montoFormateado = '$' . number_format($ticket->total_amount, 0, ',', '');
 
                 fputcsv($file, [
                     $ticket->ticket_number,
                     $ticket->customer ?? 'SIN CLIENTE',
                     $ticket->seller ?? '—',
-                    $ticket->total_amount,
+                    $montoFormateado,
                     $estado,
                     $pickersStr,
                     $horaInicio,
