@@ -43,6 +43,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/productos', [ProductosController::class, 'index'])->name('productos.index');
     Route::get('/reportes',  [ReportesController::class,  'index'])->name('reportes.index');
     Route::get('/config',    [ConfigController::class,    'index'])->name('config.index');
+    // EXPORTADOR DE XLS
+    Route::get('/reportes/export', [ReportesController::class, 'export'])->name('reportes.export');
 });
 
 // TODO: Quitar de acá, pasar a AUTENTICACION

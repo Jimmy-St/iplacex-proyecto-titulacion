@@ -21,7 +21,9 @@ class ReportesController extends Controller
 
         $tareasDia = PickingTask::whereDate('created_at', $fecha)->get();
 
-        $pendientes = $tareasDia->where('status', '!=', 'COMPLETADO')->count();
+        // Desglose de estados operativos
+        $pendientes = $tareasDia->where('status', 'PENDIENTE')->count();
+        $enProceso = $tareasDia->where('status', 'PREPARANDO')->count();
         $completados = $tareasDia->where('status', 'COMPLETADO')->count();
 
         // 3. Tiempo Promedio de Ciclo: Solo tareas creadas y completadas el mismo día seleccionado
@@ -37,7 +39,6 @@ class ReportesController extends Controller
                 $fCreacion = Carbon::parse($tarea->created_at);
                 $fActualizacion = Carbon::parse($tarea->updated_at);
 
-                // Validamos que la tarea haya nacido y muerto el mismo día para evitar saltos absurdos
                 if ($fCreacion->toDateString() === $fecha && $fActualizacion->toDateString() === $fecha) {
                     $minutos = $fCreacion->diffInMinutes($fActualizacion);
                     $tiempoTotalMinutos += $minutos;
@@ -112,9 +113,73 @@ class ReportesController extends Controller
             'fechaFormateada',
             'totalTickets',
             'pendientes',
+            'enProceso',
             'completados',
             'tiempoPromedioCiclo',
             'rendimientoPickers'
         ));
+    }
+
+    public function export(Request $request)
+    {
+        $fecha = $request->input('fecha', date('Y-m-d'));
+        $fileName = "reporte-picking-{$fecha}.csv";
+
+        // Obtener tickets de la fecha junto con su tarea de picking y pickers asociados
+        $tickets = Ticket::with(['pickingTask.pickers'])
+            ->whereDate('created_at', $fecha)
+            ->get();
+
+        $headers = [
+            "Content-type"        => "text/csv; charset=UTF-8",
+            "Content-Disposition" => "attachment; filename=$fileName",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        ];
+
+        $callback = function () use ($tickets) {
+            $file = fopen('php://output', 'w');
+
+            // Añadir BOM para correcta lectura de tildes en Excel
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+            // Cabeceras del Excel / CSV
+            fputcsv($file, ['NRO TICKET', 'CLIENTE', 'VENDEDOR', 'MONTO', 'ESTADO', 'PICKERS ASIGNADOS', 'HORA INICIO', 'HORA TERMINO / PROCESO'], ';');
+
+            foreach ($tickets as $ticket) {
+                $task = $ticket->pickingTask;
+                $estado = $task ? $task->status : 'PENDIENTE';
+
+                // Extraer nombres de pickers asignados
+                $pickersStr = 'SIN ASIGNAR';
+                if ($task && $task->pickers && $task->pickers->count() > 0) {
+                    $pickersStr = $task->pickers->pluck('display_name')->implode(', ');
+                }
+
+                $horaInicio = $ticket->created_at ? $ticket->created_at->format('d-m-Y H:i:s') : '—';
+
+                if ($estado === 'COMPLETADO' && $task && $task->updated_at) {
+                    $horaTermino = $task->updated_at->format('d-m-Y H:i:s');
+                } else {
+                    $horaTermino = 'En proceso';
+                }
+
+                fputcsv($file, [
+                    $ticket->ticket_number,
+                    $ticket->customer ?? 'SIN CLIENTE',
+                    $ticket->seller ?? '—',
+                    $ticket->total_amount,
+                    $estado,
+                    $pickersStr,
+                    $horaInicio,
+                    $horaTermino
+                ], ';');
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 }
