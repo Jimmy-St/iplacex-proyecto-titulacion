@@ -241,13 +241,13 @@
             Alpine.data('pedidosApp', () => ({
                 pedidos: [],
                 statusMap: {
-                    'pending': { label: 'PEND.', class: 'badge-pending' },
-                    'pendiente': { label: 'PEND.', class: 'badge-pending' },
-                    'pend': { label: 'PEND.', class: 'badge-pending' },
+                    'pending': { label: 'ASIGNANDO', class: 'badge-pending' },
+                    'pendiente': { label: 'ASIGNANDO', class: 'badge-pending' },
+                    'pend': { label: 'ASIGNANDO', class: 'badge-pending' },
                     
-                    'in_progress': { label: 'PREP.', class: 'badge-progress' },
-                    'preparando': { label: 'PREP.', class: 'badge-progress' },
-                    'prog': { label: 'PREP.', class: 'badge-progress' },
+                    'in_progress': { label: 'PREPARA', class: 'badge-progress' },
+                    'preparando': { label: 'PREPARA', class: 'badge-progress' },
+                    'prog': { label: 'PREPARA', class: 'badge-progress' },
                     
                     'completed': { label: 'A PAGAR', class: 'badge-pagar' },
                     'completado': { label: 'A PAGAR', class: 'badge-pagar' },
@@ -256,7 +256,7 @@
                 getStatusConfig(status) {
                     const key = String(status || '').toLowerCase().trim();
                     return this.statusMap[key] || { 
-                        label: (status || 'PEND.').toUpperCase(), 
+                        label: (status || 'ASIGNANDO').toUpperCase(), 
                         class: 'badge-pending' 
                     };
                 },
@@ -275,7 +275,7 @@
                             this.pedidos = lista.map(item => ({
                                 cliente: item.customer || 'SIN CLIENTE',
                                 ticket: item.ticket_number || item.id,
-                                picker: item.picker || item.seller || 'SIN ASIGNAR',
+                                picker: item.picker || item.seller || ' ----- ',
                                 estado: item.status || 'pending'
                             }));
                         }
