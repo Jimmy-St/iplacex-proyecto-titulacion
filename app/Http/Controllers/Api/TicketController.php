@@ -54,7 +54,7 @@ class TicketController extends Controller
                     WHERE pa.picking_task_id = pt.id 
                     ORDER BY pa.id ASC 
                     LIMIT 1
-                ), ' ----- ') as picker")
+                ), ' - ') as picker")
             ])
             ->orderByDesc('pt.updated_at')
             ->limit(12)
