@@ -245,9 +245,9 @@
                     'pendiente': { label: 'ASIGNANDO', class: 'badge-pending' },
                     'pend': { label: 'ASIGNANDO', class: 'badge-pending' },
                     
-                    'in_progress': { label: 'PREPARA', class: 'badge-progress' },
-                    'preparando': { label: 'PREPARA', class: 'badge-progress' },
-                    'prog': { label: 'PREPARA', class: 'badge-progress' },
+                    'in_progress': { label: 'PREPARANDO', class: 'badge-progress' },
+                    'preparando': { label: 'PREPARANDO', class: 'badge-progress' },
+                    'prog': { label: 'PREPARANDO', class: 'badge-progress' },
                     
                     'completed': { label: 'A PAGAR', class: 'badge-pagar' },
                     'completado': { label: 'A PAGAR', class: 'badge-pagar' },
