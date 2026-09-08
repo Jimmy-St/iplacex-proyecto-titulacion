@@ -42,7 +42,7 @@
     </div>
 
     <div class="relative bg-white border border-purple-200 rounded-xl px-4 py-4 shadow-sm overflow-hidden">
-        <div class="absolute -right-4 -bottom-9 pointer-events-none text-amber-50 transform -rotate-12">
+        <div class="absolute -right-4 -bottom-9 pointer-events-none text-blue-50 transform -rotate-12">
             <i data-lucide="clipboard-clock" class="w-32 h-32"></i>
         </div>
         <div class="relative z-10">
