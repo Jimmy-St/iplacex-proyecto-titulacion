@@ -47,7 +47,7 @@
     <div class="relative bg-white border border-purple-200 rounded-xl px-4 py-4 shadow-sm overflow-hidden">
         <!-- Ícono de fondo en diagonal -->
         <div class="absolute -right-4 -bottom-6 pointer-events-none text-slate-100 transform -rotate-12">
-            <i data-lucide="ticket" class="w-32 h-32"></i>
+            <i data-lucide="clipboard-clock" class="w-32 h-32"></i>
         </div>
 
         <!-- Contenido de la tarjeta -->
@@ -60,7 +60,7 @@
     <div class="relative bg-white border border-purple-200 rounded-xl px-4 py-4 shadow-sm overflow-hidden">
         <!-- Ícono de fondo en diagonal -->
         <div class="absolute -right-4 -bottom-6 pointer-events-none text-slate-100 transform -rotate-12">
-            <i data-lucide="ticket" class="w-32 h-32"></i>
+            <i data-lucide="list-checks" class="w-32 h-32"></i>
         </div>
 
         <!-- Contenido de la tarjeta -->
@@ -73,7 +73,7 @@
     <div class="relative bg-white border border-purple-200 rounded-xl px-4 py-4 shadow-sm overflow-hidden">
         <!-- Ícono de fondo en diagonal -->
         <div class="absolute -right-4 -bottom-6 pointer-events-none text-slate-100 transform -rotate-12">
-            <i data-lucide="ticket" class="w-32 h-32"></i>
+            <i data-lucide="ticket-check" class="w-32 h-32"></i>
         </div>
 
         <!-- Contenido de la tarjeta -->
@@ -86,7 +86,7 @@
     <div class="relative bg-white border border-purple-200 rounded-xl px-4 py-4 shadow-sm overflow-hidden">
         <!-- Ícono de fondo en diagonal -->
         <div class="absolute -right-4 -bottom-6 pointer-events-none text-slate-100 transform -rotate-12">
-            <i data-lucide="ticket" class="w-32 h-32"></i>
+            <i data-lucide="timer" class="w-32 h-32"></i>
         </div>
 
         <!-- Contenido de la tarjeta -->
