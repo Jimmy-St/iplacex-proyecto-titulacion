@@ -31,9 +31,17 @@
   {{-- KPIs Globales (5 Columnas: Incluye En Proceso) --}}
   <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-8">
 
-    <div class="bg-white border border-purple-200 rounded-xl px-4 py-4 shadow-sm">
-      <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Tickets fecha</p>
-      <p class="text-2xl font-bold text-slate-900">{{ $totalTickets }}</p>
+    <div class="relative bg-white border border-purple-200 rounded-xl px-4 py-4 shadow-sm overflow-hidden">
+        <!-- Ícono de fondo en diagonal -->
+        <div class="absolute -right-4 -bottom-6 pointer-events-none text-slate-100 transform -rotate-12">
+            <i data-lucide="ticket" class="w-32 h-32"></i>
+        </div>
+
+        <!-- Contenido de la tarjeta -->
+        <div class="relative z-10">
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Tickets fecha</p>
+            <p class="text-2xl font-bold text-slate-900">{{ $totalTickets }}</p>
+        </div>
     </div>
 
     <div class="bg-white border border-purple-200 rounded-xl px-4 py-4 shadow-sm">
