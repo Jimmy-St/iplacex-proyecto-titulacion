@@ -44,24 +44,56 @@
         </div>
     </div>
 
-    <div class="bg-white border border-purple-200 rounded-xl px-4 py-4 shadow-sm">
-      <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Pendientes</p>
-      <p class="text-2xl font-bold text-amber-600">{{ $pendientes }}</p>
+    <div class="relative bg-white border border-purple-200 rounded-xl px-4 py-4 shadow-sm overflow-hidden">
+        <!-- Ícono de fondo en diagonal -->
+        <div class="absolute -right-4 -bottom-6 pointer-events-none text-slate-100 transform -rotate-12">
+            <i data-lucide="ticket" class="w-32 h-32"></i>
+        </div>
+
+        <!-- Contenido de la tarjeta -->
+        <div class="relative z-10">
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Pendientes</p>
+            <p class="text-2xl font-bold text-slate-900">{{ $pendientes }}</p>
+        </div>
     </div>
 
-    <div class="bg-white border border-purple-200 rounded-xl px-4 py-4 shadow-sm">
-      <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">En Proceso</p>
-      <p class="text-2xl font-bold text-blue-600">{{ $enProceso ?? 0 }}</p>
+    <div class="relative bg-white border border-purple-200 rounded-xl px-4 py-4 shadow-sm overflow-hidden">
+        <!-- Ícono de fondo en diagonal -->
+        <div class="absolute -right-4 -bottom-6 pointer-events-none text-slate-100 transform -rotate-12">
+            <i data-lucide="ticket" class="w-32 h-32"></i>
+        </div>
+
+        <!-- Contenido de la tarjeta -->
+        <div class="relative z-10">
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">En Proceso</p>
+            <p class="text-2xl font-bold text-slate-900">{{ $enProceso }}</p>
+        </div>
     </div>
 
-    <div class="bg-white border border-purple-200 rounded-xl px-4 py-4 shadow-sm">
-      <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Completados</p>
-      <p class="text-2xl font-bold text-emerald-600">{{ $completados }}</p>
+    <div class="relative bg-white border border-purple-200 rounded-xl px-4 py-4 shadow-sm overflow-hidden">
+        <!-- Ícono de fondo en diagonal -->
+        <div class="absolute -right-4 -bottom-6 pointer-events-none text-slate-100 transform -rotate-12">
+            <i data-lucide="ticket" class="w-32 h-32"></i>
+        </div>
+
+        <!-- Contenido de la tarjeta -->
+        <div class="relative z-10">
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Completados</p>
+            <p class="text-2xl font-bold text-slate-900">{{ $completados }}</p>
+        </div>
     </div>
 
-    <div class="bg-white border border-purple-200 rounded-xl px-4 py-4 shadow-sm col-span-2 md:col-span-1">
-      <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Tiempo Prom. Ciclo</p>
-      <p class="text-2xl font-bold text-purple-700">{{ $tiempoPromedioCiclo }} min</p>
+    <div class="relative bg-white border border-purple-200 rounded-xl px-4 py-4 shadow-sm overflow-hidden">
+        <!-- Ícono de fondo en diagonal -->
+        <div class="absolute -right-4 -bottom-6 pointer-events-none text-slate-100 transform -rotate-12">
+            <i data-lucide="ticket" class="w-32 h-32"></i>
+        </div>
+
+        <!-- Contenido de la tarjeta -->
+        <div class="relative z-10">
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Tiempo promedio</p>
+            <p class="text-2xl font-bold text-slate-900">{{ $tiempoPromedioCiclo }}</p>
+        </div>
     </div>
 
   </div>
