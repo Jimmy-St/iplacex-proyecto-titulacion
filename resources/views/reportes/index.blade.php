@@ -32,12 +32,9 @@
   <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-8">
 
     <div class="relative bg-white border border-purple-200 rounded-xl px-4 py-4 shadow-sm overflow-hidden">
-        <!-- Ícono de fondo en diagonal -->
-        <div class="absolute -right-4 -bottom-6 pointer-events-none text-violet-50 transform -rotate-12">
+        <div class="absolute -right-4 -bottom-6 pointer-events-none text-slate-50 transform -rotate-12">
             <i data-lucide="ticket" class="w-32 h-32"></i>
         </div>
-
-        <!-- Contenido de la tarjeta -->
         <div class="relative z-10">
             <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Tickets fecha</p>
             <p class="text-2xl font-bold text-slate-900">{{ $totalTickets }}</p>
@@ -45,57 +42,44 @@
     </div>
 
     <div class="relative bg-white border border-purple-200 rounded-xl px-4 py-4 shadow-sm overflow-hidden">
-        <!-- Ícono de fondo en diagonal -->
-        <div class="absolute -right-4 -bottom-9 pointer-events-none text-violet-50 transform -rotate-12">
+        <div class="absolute -right-4 -bottom-9 pointer-events-none text-amber-50 transform -rotate-12">
             <i data-lucide="clipboard-clock" class="w-32 h-32"></i>
         </div>
-
-        <!-- Contenido de la tarjeta -->
         <div class="relative z-10">
             <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Pendientes</p>
-            <p class="text-2xl font-bold text-slate-900">{{ $pendientes }}</p>
+            <p class="text-2xl font-bold text-amber-900">{{ $pendientes }}</p>
         </div>
     </div>
 
     <div class="relative bg-white border border-purple-200 rounded-xl px-4 py-4 shadow-sm overflow-hidden">
-        <!-- Ícono de fondo en diagonal -->
-        <div class="absolute -right-4 -bottom-8 pointer-events-none text-violet-50 transform -rotate-12">
+        <div class="absolute -right-4 -bottom-8 pointer-events-none text-blue-50 transform -rotate-12">
             <i data-lucide="list-checks" class="w-32 h-32"></i>
         </div>
-
-        <!-- Contenido de la tarjeta -->
         <div class="relative z-10">
             <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">En Proceso</p>
-            <p class="text-2xl font-bold text-slate-900">{{ $enProceso }}</p>
+            <p class="text-2xl font-bold text-blue-900">{{ $enProceso }}</p>
         </div>
     </div>
 
     <div class="relative bg-white border border-purple-200 rounded-xl px-4 py-4 shadow-sm overflow-hidden">
-        <!-- Ícono de fondo en diagonal -->
-        <div class="absolute -right-4 -bottom-6 pointer-events-none text-violet-50 transform -rotate-12">
+        <div class="absolute -right-4 -bottom-6 pointer-events-none text-emerald-50 transform -rotate-12">
             <i data-lucide="ticket-check" class="w-32 h-32"></i>
         </div>
-
-        <!-- Contenido de la tarjeta -->
         <div class="relative z-10">
             <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Completados</p>
-            <p class="text-2xl font-bold text-slate-900">{{ $completados }}</p>
+            <p class="text-2xl font-bold text-emerald-900">{{ $completados }}</p>
         </div>
     </div>
 
     <div class="relative bg-white border border-purple-200 rounded-xl px-4 py-4 shadow-sm overflow-hidden">
-        <!-- Ícono de fondo en diagonal -->
-        <div class="absolute -right-4 -bottom-11 pointer-events-none text-violet-50 transform -rotate-12">
+        <div class="absolute -right-4 -bottom-11 pointer-events-none text-purple-50 transform -rotate-12">
             <i data-lucide="timer" class="w-32 h-32"></i>
         </div>
-
-        <!-- Contenido de la tarjeta -->
         <div class="relative z-10">
             <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Tiempo promedio</p>
-            <p class="text-2xl font-bold text-slate-900">{{ $tiempoPromedioCiclo }}</p>
+            <p class="text-2xl font-bold text-purple-900">{{ $tiempoPromedioCiclo }}</p>
         </div>
     </div>
-
   </div>
 
   {{-- Sección: Desempeño por Picker --}}
