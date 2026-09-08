@@ -72,7 +72,7 @@
 
     <div class="relative bg-white border border-purple-200 rounded-xl px-4 py-4 shadow-sm overflow-hidden">
         <!-- Ícono de fondo en diagonal -->
-        <div class="absolute -right-4 -bottom-6 pointer-events-none text-violet-200 transform -rotate-12">
+        <div class="absolute -right-4 -bottom-6 pointer-events-none text-violet-50 transform -rotate-12">
             <i data-lucide="ticket-check" class="w-32 h-32"></i>
         </div>
 
