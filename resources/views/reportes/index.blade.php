@@ -100,10 +100,12 @@
 
     {{-- Listado Dinámico --}}
     <div class="divide-y divide-slate-100">
-      @forelse($rendimientoPickers as $pickerData)
+      @forelse($rendimientoPickers as $pickerData)      
         <div class="grid grid-cols-2 md:grid-cols-12 items-center px-4 py-3.5 hover:bg-purple-50/40 transition-colors gap-2 md:gap-0">
           <div class="col-span-2 md:col-span-3">
-            <div class="text-sm font-bold text-slate-900 uppercase">{{ $pickerData['display_name'] }}</div>
+          <a href="{{ route('pickers.show', $pickerData['picker_id']) }}" class="group block">
+              <div class="text-sm font-bold text-slate-900 uppercase group-hover:text-purple-700 transition-colors">{{ $pickerData['display_name'] }}</div>
+          </a>
             <div class="text-xs font-mono font-semibold text-slate-500">{{ $pickerData['employee_code'] }}</div>
           </div>
           <div class="hidden md:block md:col-span-2 text-xs font-semibold text-slate-600">{{ $pickerData['zone_assigned'] }}</div>

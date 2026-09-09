@@ -93,6 +93,7 @@ class ReportesController extends Controller
             }
 
             return [
+                'picker_id' => $picker->id,
                 'display_name' => $nombreCompleto,
                 'employee_code' => $picker->employee_code,
                 'zone_assigned' => $picker->zone_assigned ?? 'General',
