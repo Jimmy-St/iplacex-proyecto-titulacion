@@ -338,7 +338,7 @@ class TicketController extends Controller
             ->where('pt.status', 'PREPARANDO')
             ->select([
                 't.ticket_number',
-                'p.display_name as picker_name',
+                DB::raw("TRIM(p.first_name || ' ' || p.last_name) as picker_name"),
                 'pt.updated_at'
             ])
             ->orderByDesc('pa.id')

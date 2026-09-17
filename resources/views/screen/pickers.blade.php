@@ -19,7 +19,7 @@
             --font-size-title: 3.2vh;
             --font-size-header: 2.4vh;
             --font-size-picker: 3.5vh;
-            --font-size-ticket: 4.8vh;
+            --font-size-ticket: 5vh;
             --body-padding: 1.5vh;
             --container-max-width: 1900px;
             --container-radius: 1rem;
@@ -220,7 +220,7 @@
             <div class="left-section">
                 <div class="columns-header">
                     <span class="column-label">PICKER</span>
-                    <span class="column-label">TICKET</span>
+                    <span class="column-label">TICKET ASIGNADO</span>
                 </div>
 
                 <div class="rows-container">
