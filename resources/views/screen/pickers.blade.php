@@ -202,7 +202,7 @@
         .ranking-score {
             background-color: #9333ea;
             color: #ffffff;
-            font-size: 2.2vh;
+            font-size: 2.3vh;
             font-weight: 900;
             font-family: monospace;
             padding: 0.3vh 1vw;
@@ -213,7 +213,7 @@
 <body>
     <div x-data="armadoresApp" class="screen-container">
         <header class="screen-header">
-            <h1 class="screen-title">ESTADO DE PEDIDOS ARMADORES</h1>
+            <h1 class="screen-title">ASIGNACIÓN DE PEDIDOS ARMADORES</h1>
         </header>
         
         <div class="screen-body">
