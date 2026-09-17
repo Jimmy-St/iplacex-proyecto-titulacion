@@ -336,6 +336,7 @@ class TicketController extends Controller
             ->join('picking_tasks as pt', 'pt.id', '=', 'pa.picking_task_id')
             ->join('tickets as t', 't.id', '=', 'pt.ticket_id')
             ->where('pt.status', 'PREPARANDO')
+            ->whereNull('p.deleted_at')
             ->select([
                 't.ticket_number',
                 DB::raw("TRIM(p.first_name || ' ' || p.last_name) as picker_name"),
