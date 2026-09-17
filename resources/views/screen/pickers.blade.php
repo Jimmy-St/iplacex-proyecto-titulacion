@@ -75,7 +75,7 @@
         .screen-body {
             flex: 1;
             display: grid;
-            grid-template-columns: 2fr 1fr;
+            grid-template-columns: 19fr 11fr;
             min-height: 0;
         }
 
@@ -89,7 +89,7 @@
         .columns-header {
             flex-shrink: 0;
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 13fr 7fr;
             align-items: center;
             padding: 1vh var(--grid-padding-x);
             border-bottom: 1px solid var(--color-border);
@@ -116,7 +116,7 @@
         .order-row {
             flex: 1;
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 13fr 7fr;
             align-items: center;
             padding: 0 var(--grid-padding-x);
             background-color: transparent;
