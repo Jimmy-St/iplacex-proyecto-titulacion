@@ -96,6 +96,9 @@ class TicketController extends Controller
 
         $task->update(['status' => 'COMPLETADO']);
 
+        $this->accumulateDailyTotals($ticket);
+        $this->accumulatePickerTotals($ticket);
+
         return response()->json([
             'success' => true,
             'message' => 'Ticket y tarea de picking completados exitosamente',
