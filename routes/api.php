@@ -48,3 +48,9 @@ Route::get('/pickers/scores', [App\Http\Controllers\Api\TicketController::class,
 
 //
 Route::get('/pickers/active-tasks', [App\Http\Controllers\Api\TicketController::class, 'pickerTasks']);
+
+
+
+
+//
+Route::get('/pickers/totales', [App\Http\Controllers\Api\TicketController::class, 'totales']);

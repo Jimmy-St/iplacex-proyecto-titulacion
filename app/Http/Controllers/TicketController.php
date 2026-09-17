@@ -96,6 +96,7 @@ class TicketController extends Controller
 
         $task->update(['status' => 'COMPLETADO']);
 
+        // Add totales
         $this->accumulateDailyTotals($ticket);
         $this->accumulatePickerTotals($ticket);
 

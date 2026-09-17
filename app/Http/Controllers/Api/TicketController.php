@@ -351,4 +351,75 @@ class TicketController extends Controller
             'tasks' => $activeTasks
         ], 200);
     }
+
+
+    /**
+     * Calculates and returns the calculated score metrics for pickers on a given date.
+     * 
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function totales(Request $request)
+    {
+        $date = $request->input('date', now()->toDateString());
+
+        $weightTickets = 1;
+        $weightItems = 1;
+        $weightAmount = 1;
+
+        $globalTotals = DB::table('total_day')->where('date', $date)->first();
+
+        if (!$globalTotals) {
+            return response()->json([
+                'date' => $date,
+                'message' => 'No global totals found for this date.',
+                'rankings' => []
+            ], 404);
+        }
+
+        $pickersData = DB::table('picker_total_day as ptd')
+            ->join('pickers as p', 'p.id', '=', 'ptd.picker_id')
+            ->where('ptd.date', $date)
+            ->select([
+                'p.id as picker_id',
+                'p.display_name',
+                'ptd.total_tasks',
+                'ptd.total_items',
+                'ptd.total_amount'
+            ])
+            ->get();
+
+        $rankings = $pickersData->map(function ($picker) use ($globalTotals, $weightTickets, $weightItems, $weightAmount) {
+
+            $ticketShare = $globalTotals->total_tickets > 0 ? ($picker->total_tasks / $globalTotals->total_tickets) * 100 : 0;
+
+            $itemShare = $globalTotals->total_items > 0 ? ($picker->total_items / $globalTotals->total_items) * 100 : 0;
+
+            $amountShare = $globalTotals->total_amount > 0 ? ($picker->total_amount / $globalTotals->total_amount) * 100 : 0;
+
+            $finalScore = ($ticketShare * $weightTickets) + ($itemShare * $weightItems) + ($amountShare * $weightAmount);
+
+            return [
+                'picker_id'    => $picker->picker_id,
+                'display_name' => $picker->display_name,
+                'metrics'      => [
+                    'tickets' => $picker->total_tasks,
+                    'items'   => $picker->total_items,
+                    'amount'  => $picker->total_amount,
+                ],
+                'shares_percentage' => [
+                    'tickets' => round($ticketShare, 2),
+                    'items'   => round($itemShare, 2),
+                    'amount'  => round($amountShare, 2),
+                ],
+                'final_score' => round($finalScore, 2),
+            ];
+        })->sortByDesc('final_score')->values();
+
+        return response()->json([
+            'date' => $date,
+            'global_totals' => $globalTotals,
+            'rankings' => $rankings
+        ], 200);
+    }
 }
