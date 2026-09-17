@@ -41,3 +41,10 @@ Route::put('/ticket/{ticket_number}', [TicketController::class, 'update']);
 // TICKETS NUEVOS
 Route::get('/ticket/latest', [TicketController::class, 'latest']);
 Route::get('/picker/latest', [TicketController::class, 'pickerActivityLatest']);
+
+
+// PASO: URL para revision de puntaje
+Route::get('/pickers/scores', [App\Http\Controllers\Api\TicketController::class, 'pickerScore']);
+
+//
+Route::get('/pickers/active-tasks', [App\Http\Controllers\Api\TicketController::class, 'pickerTasks']);

@@ -43,12 +43,10 @@ class TicketController extends Controller
 
     public function show($ticket_number)
     {
-        // 1. Buscamos el ticket cargando sus items, la tarea de picking y los pickers asociados a esa tarea
         $ticket = Ticket::with(['items', 'pickingTask.pickers'])
             ->where('ticket_number', $ticket_number)
             ->first();
 
-        // 2. Traemos todos los pickers disponibles con el conteo de sus tareas activas en curso
         $pickers = Picker::withCount(['pickingTasks as active_tasks_count' => function ($query) {
             $query->whereIn('status', ['PENDIENTE', 'PREPARANDO']);
         }])
@@ -61,29 +59,22 @@ class TicketController extends Controller
     // actualiza Pickers en Ticket
     public function updatePickers(Request $request)
     {
-        // 1. Recibimos los datos del JSON
         $ticketId = $request->input('ticket_id');
-        $pickerIds = $request->input('pickers', []); // Ej: [1, 2, 3] o []
+        $pickerIds = $request->input('pickers', []);
 
-        // 2. Calculamos el estado según la cantidad de pickers
         $status = empty($pickerIds) ? 'PENDIENTE' : 'PREPARANDO';
 
-        // 3. Verificamos que el ticket exista
         $ticket = Ticket::findOrFail($ticketId);
 
-        // 4. Buscamos la tarea asociada o la creamos al vuelo si no existe (para tickets antiguos)
         $task = PickingTask::firstOrCreate(
             ['ticket_id' => $ticket->id],
-            ['status' => 'PENDIENTE'] // Estado inicial por defecto si se crea nueva
+            ['status' => 'PENDIENTE']
         );
 
-        // 5. Sincronizamos los pickers en la tabla pivote
         $task->pickers()->sync($pickerIds);
 
-        // 6. Actualizamos el estado de la tarea
         $task->update(['status' => $status]);
 
-        // 7. Retornamos la respuesta confirmando el éxito
         return response()->json([
             'success' => true,
             'message' => 'Pickers y estado de la tarea actualizados correctamente',
@@ -93,21 +84,18 @@ class TicketController extends Controller
             'status_tarea' => $status
         ]);
     }
+
     // Endpoint Web
     public function completeTicket(Request $request)
     {
         $ticketId = $request->input('ticket_id');
 
-        // 1. Verificamos que el ticket exista
         $ticket = Ticket::findOrFail($ticketId);
 
-        // 2. Buscamos la tarea de picking asociada
         $task = PickingTask::where('ticket_id', $ticket->id)->firstOrFail();
 
-        // 3. Actualizamos el estado a COMPLETADO
         $task->update(['status' => 'COMPLETADO']);
 
-        // 4. Retornamos la respuesta de éxito
         return response()->json([
             'success' => true,
             'message' => 'Ticket y tarea de picking completados exitosamente',
@@ -115,5 +103,65 @@ class TicketController extends Controller
             'picking_task_id' => $task->id,
             'status_tarea' => 'COMPLETADO'
         ]);
+    }
+
+    /**
+     * Accumulates ticket total/day.
+     * 
+     * @param Ticket $ticket
+     * @return void
+     */
+    private function accumulateDailyTotals(Ticket $ticket): void
+    {
+        $today = now()->toDateString();
+        $totalItems = $ticket->items()->sum('quantity');
+
+        DB::table('total_day')->updateOrInsert(
+            ['date' => $today],
+            [
+                'total_tickets' => DB::raw('total_tickets + 1'),
+                'total_items'   => DB::raw("total_items + {$totalItems}"),
+                'total_amount'  => DB::raw("total_amount + {$ticket->total_amount}"),
+            ]
+        );
+    }
+
+    /**
+     * Accumulates ticket for picker.
+     * 
+     * @param Ticket $ticket
+     * @return void
+     */
+    private function accumulatePickerTotals(Ticket $ticket): void
+    {
+        $today = now()->toDateString();
+        $pickers = $ticket->pickingTask->pickers ?? collect();
+        $pickerCount = $pickers->count();
+
+        if ($pickerCount === 0) {
+            return;
+        }
+
+        $totalItems = $ticket->items()->sum('quantity');
+        $totalAmount = $ticket->total_amount;
+
+        $shareTasks = 1 / $pickerCount;
+        $shareItems = $totalItems / $pickerCount;
+        $shareAmount = $totalAmount / $pickerCount;
+
+        foreach ($pickers as $picker) {
+            DB::table('picker_total_day')->updateOrInsert(
+                [
+                    'picker_id' => $picker->id,
+                    'date' => $today
+                ],
+                [
+                    'total_tasks'  => DB::raw("total_tasks + {$shareTasks}"),
+                    'total_items'  => DB::raw("total_items + {$shareItems}"),
+                    'total_amount' => DB::raw("total_amount + {$shareAmount}"),
+                    'total_points' => DB::raw("total_points + 0"),
+                ]
+            );
+        }
     }
 }

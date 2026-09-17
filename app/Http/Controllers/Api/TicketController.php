@@ -252,4 +252,102 @@ class TicketController extends Controller
 
         return $clean === '' ? 0.0 : (float) $clean;
     }
+
+
+    /**
+     * Returns top and bottom picker rankings for a given date.
+     * 
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function pickerScore(Request $request)
+    {
+        $date = $request->input('date', now()->toDateString());
+        $limit = 3;
+
+        $weightTickets = 1;
+        $weightItems = 1;
+        $weightAmount = 1;
+
+        $globalTotals = DB::table('total_day')->where('date', $date)->first();
+
+        if (!$globalTotals || $globalTotals->total_tickets == 0) {
+            return response()->json([
+                'date' => $date,
+                'top' => [],
+                'bottom' => []
+            ], 200);
+        }
+
+        $pickersData = DB::table('picker_total_day as ptd')
+            ->join('pickers as p', 'p.id', '=', 'ptd.picker_id')
+            ->where('ptd.date', $date)
+            ->where('ptd.total_tasks', '>', 0)
+            ->select([
+                'p.id as picker_id',
+                'p.display_name',
+                'ptd.total_tasks',
+                'ptd.total_items',
+                'ptd.total_amount'
+            ])
+            ->get();
+
+        if ($pickersData->isEmpty()) {
+            return response()->json([
+                'date' => $date,
+                'top' => [],
+                'bottom' => []
+            ], 200);
+        }
+
+        $rankings = $pickersData->map(function ($picker) use ($globalTotals, $weightTickets, $weightItems, $weightAmount) {
+            $ticketShare = ($picker->total_tasks / $globalTotals->total_tickets) * 100;
+            $itemShare = ($picker->total_items / $globalTotals->total_items) * 100;
+            $amountShare = ($picker->total_amount / $globalTotals->total_amount) * 100;
+
+            $finalScore = ($ticketShare * $weightTickets) + ($itemShare * $weightItems) + ($amountShare * $weightAmount);
+
+            return [
+                'picker_id'    => $picker->picker_id,
+                'display_name' => $picker->display_name,
+                'final_score'  => round($finalScore, 1),
+            ];
+        })->sortByDesc('final_score')->values();
+
+        return response()->json([
+            'date'   => $date,
+            'top'    => $rankings->take($limit),
+            'bottom' => $rankings->sortBy('final_score')->take($limit)->values()->reverse()->values()
+        ], 200);
+    }
+
+    /**
+     * Returns active picking tasks in progress
+     * 
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function pickerTasks(Request $request)
+    {
+        $limit = 12;
+
+        $activeTasks = DB::table('picking_assignments as pa')
+            ->join('pickers as p', 'p.id', '=', 'pa.picker_id')
+            ->join('picking_tasks as pt', 'pt.id', '=', 'pa.picking_task_id')
+            ->join('tickets as t', 't.id', '=', 'pt.ticket_id')
+            ->where('pt.status', 'PREPARANDO')
+            ->select([
+                't.ticket_number',
+                'p.display_name as picker_name',
+                'pt.updated_at'
+            ])
+            ->orderByDesc('pa.id')
+            ->limit($limit)
+            ->get();
+
+        return response()->json([
+            'count' => $activeTasks->count(),
+            'tasks' => $activeTasks
+        ], 200);
+    }
 }
