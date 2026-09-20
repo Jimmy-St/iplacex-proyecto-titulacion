@@ -85,7 +85,7 @@ class TicketController extends Controller
         ]);
     }
 
-    // Endpoint Web
+    // Endpoint Web para completar ticket
     public function completeTicket(Request $request)
     {
         $ticketId = $request->input('ticket_id');
@@ -120,18 +120,26 @@ class TicketController extends Controller
         $today = now()->toDateString();
         $totalItems = $ticket->items()->sum('quantity');
 
-        DB::table('total_day')->updateOrInsert(
-            ['date' => $today],
-            [
-                'total_tickets' => DB::raw('total_tickets + 1'),
-                'total_items'   => DB::raw("total_items + {$totalItems}"),
-                'total_amount'  => DB::raw("total_amount + {$ticket->total_amount}"),
-            ]
-        );
+        $exists = DB::table('total_day')->where('date', $today)->exists();
+
+        if (!$exists) {
+            DB::table('total_day')->insert([
+                'date'          => $today,
+                'total_tickets' => 0,
+                'total_items'   => 0,
+                'total_amount'  => 0,
+            ]);
+        }
+
+        DB::table('total_day')->where('date', $today)->update([
+            'total_tickets' => DB::raw('total_tickets + 1'),
+            'total_items'   => DB::raw("total_items + {$totalItems}"),
+            'total_amount'  => DB::raw("total_amount + {$ticket->total_amount}"),
+        ]);
     }
 
     /**
-     * Accumulates ticket for picker.
+     * Accumulates ticket for picker in day.
      * 
      * @param Ticket $ticket
      * @return void
@@ -154,18 +162,30 @@ class TicketController extends Controller
         $shareAmount = $totalAmount / $pickerCount;
 
         foreach ($pickers as $picker) {
-            DB::table('picker_total_day')->updateOrInsert(
-                [
-                    'picker_id' => $picker->id,
-                    'date' => $today
-                ],
-                [
+            $exists = DB::table('picker_total_day')
+                ->where('picker_id', $picker->id)
+                ->where('date', $today)
+                ->exists();
+
+            if (!$exists) {
+                DB::table('picker_total_day')->insert([
+                    'picker_id'    => $picker->id,
+                    'date'         => $today,
+                    'total_tasks'  => 0,
+                    'total_items'  => 0,
+                    'total_amount' => 0,
+                    'total_points' => 0,
+                ]);
+            }
+
+            DB::table('picker_total_day')
+                ->where('picker_id', $picker->id)
+                ->where('date', $today)
+                ->update([
                     'total_tasks'  => DB::raw("total_tasks + {$shareTasks}"),
                     'total_items'  => DB::raw("total_items + {$shareItems}"),
                     'total_amount' => DB::raw("total_amount + {$shareAmount}"),
-                    'total_points' => DB::raw("total_points + 0"),
-                ]
-            );
+                ]);
         }
     }
 }

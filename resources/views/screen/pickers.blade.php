@@ -7,259 +7,222 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
         :root {
-            --color-bg-body: #f8fafc;
-            --color-bg-card: #ffffff;
-            --color-bg-row-alt: rgba(233, 213, 255, 0.35);
-            --color-border: #c084fc;
-            --color-text-main: #0f172a;
-            --color-text-muted: #581c87;
-            --color-text-ticket: #334155;
-            --color-title: #9333ea;
-            --font-family-base: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            --font-size-title: 3.2vh;
-            --font-size-header: 2.4vh;
-            --font-size-picker: 3.5vh;
-            --font-size-ticket: 5vh;
-            --body-padding: 1.5vh;
-            --container-max-width: 1900px;
-            --container-radius: 1rem;
-            --grid-padding-x: 2vw;
+            --purple: #9333ea;
+            --purple-dark: #581c87;
+            --line: #c084fc;
+            --tint: #faf5ff;
+            --ink: #0f172a;
+
+            --pad: max(16px, 2vw);   /* margen lateral */
+            --cols: 13fr 7fr;        /* columnas Picker | Ticket */
+
+            /* Tamaños: escalan con la altura de la pantalla (TV), pero se limitan por ancho y por un mínimo (móvil) */
+            --fs-sm: max(13px, min(2.3vh, 4vw));
+            --fs-md: max(16px, min(3.5vh, 6vw));
+            --fs-lg: max(20px, min(5vh, 7vw));
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
-            background-color: var(--color-bg-body);
-            font-family: var(--font-family-base);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: var(--body-padding);
+            height: 100dvh;
+            padding: 1.5vh;
+            background: #f8fafc;
+            color: var(--ink);
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
         }
 
-        .screen-container {
-            width: 100%;
+        /* ── Tarjeta principal: cabecera + cuerpo ── */
+        .screen {
+            display: grid;
+            grid-template-rows: auto minmax(0, 1fr);
             height: 100%;
-            max-width: var(--container-max-width);
-            background-color: var(--color-bg-card);
-            border: 1px solid var(--color-border);
-            border-radius: var(--container-radius);
-            box-shadow: 0 15px 30px -5px rgba(147, 51, 234, 0.1);
-            display: flex;
-            flex-direction: column;
+            max-width: 1900px;
+            margin: 0 auto;
             overflow: hidden;
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 1rem;
+            box-shadow: 0 15px 30px -5px rgba(147, 51, 234, .1);
         }
 
-        .screen-header {
-            flex-shrink: 0;
-            background-color: #faf5ff;
-            border-bottom: 1px solid var(--color-border);
-            padding: 1.2vh var(--grid-padding-x);
+        .screen > header {
+            padding: 1.2vh var(--pad);
+            background: var(--tint);
+            border-bottom: 1px solid var(--line);
             text-align: center;
         }
 
-        .screen-title {
-            color: var(--color-title);
-            font-size: var(--font-size-title);
+        h1 {
+            color: var(--purple);
+            font-size: var(--fs-md);
             font-weight: 900;
-            letter-spacing: 0.08em;
+            letter-spacing: .08em;
+            text-wrap: balance;
         }
 
-        .screen-body {
-            flex: 1;
+        /* ── Cuerpo: tareas | rankings ── */
+        .body {
             display: grid;
             grid-template-columns: 19fr 11fr;
             min-height: 0;
         }
 
-        .left-section {
-            display: flex;
-            flex-direction: column;
-            border-right: 1px solid var(--color-border);
-            min-height: 0;
-        }
+        /* Tareas */
+        .tasks { display: flex; flex-direction: column; min-height: 0; }
 
-        .columns-header {
-            flex-shrink: 0;
+        .row {
             display: grid;
-            grid-template-columns: 13fr 7fr;
+            grid-template-columns: var(--cols);
             align-items: center;
-            padding: 1vh var(--grid-padding-x);
-            border-bottom: 1px solid var(--color-border);
-            background-color: #f3e8ff;
+            padding: .4rem var(--pad);
         }
 
-        .column-label {
-            color: var(--color-text-muted);
-            font-size: var(--font-size-header);
+        .head {
+            background: #f3e8ff;
+            border-bottom: 1px solid var(--line);
+            color: var(--purple-dark);
+            font-size: var(--fs-sm);
             font-weight: 800;
-            letter-spacing: 0.05em;
+            letter-spacing: .05em;
         }
 
-        .rows-container {
+        .rows {
             flex: 1;
             display: flex;
             flex-direction: column;
-            min-height: 0;
-            gap: 0.6vh;
+            gap: .6vh;
             padding: 1vh 0;
+            min-height: 0;
             overflow: hidden;
         }
+        .rows .row { flex: 1; }
+        .rows > div:nth-of-type(odd) { background: rgba(233, 213, 255, .35); }
 
-        .order-row {
-            flex: 1;
-            display: grid;
-            grid-template-columns: 13fr 7fr;
-            align-items: center;
-            padding: 0 var(--grid-padding-x);
-            background-color: transparent;
-        }
-
-        .order-row-alt {
-            background-color: var(--color-bg-row-alt);
-        }
-
-        .cell-picker {
-            color: var(--color-text-main);
-            font-size: var(--font-size-picker);
-            font-weight: 800;
-            text-transform: uppercase;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+        .name {
             padding-right: 1vw;
-        }
-
-        .cell-ticket {
-            color: var(--color-text-ticket);
-            font-size: var(--font-size-ticket);
+            overflow: hidden;
+            font-size: var(--fs-md);
             font-weight: 800;
-            font-family: monospace;
+            text-transform: uppercase;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
-        .right-section {
+        .ticket {
+            color: #334155;
+            font: 800 var(--fs-lg) monospace;
+        }
+
+        /* Rankings */
+        .rankings {
+            display: grid;
+            grid-template-rows: 1fr 1fr;
+            min-height: 0;
+            background: var(--tint);
+            border-left: 1px solid var(--line);
+        }
+
+        .ranking {
             display: flex;
             flex-direction: column;
-            background-color: #faf5ff;
             min-height: 0;
+            padding: 1.5vh var(--pad);
         }
+        .ranking + .ranking { border-top: 1px solid var(--line); }
 
-        .ranking-box {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            padding: 1.5vh 2vw;
-            border-bottom: 1px solid var(--color-border);
-            min-height: 0;
-        }
-
-        .ranking-box:last-child {
-            border-bottom: none;
-        }
-
-        .ranking-title {
-            color: var(--color-title);
-            font-size: 2.2vh;
-            font-weight: 900;
-            letter-spacing: 0.05em;
+        h2 {
             margin-bottom: 1vh;
+            padding-bottom: .5vh;
+            border-bottom: 2px dashed var(--line);
+            color: var(--purple);
+            font-size: var(--fs-sm);
+            font-weight: 900;
+            letter-spacing: .05em;
             text-align: center;
-            border-bottom: 2px dashed var(--color-border);
-            padding-bottom: 0.5vh;
         }
 
-        .ranking-list {
+        ol {
             flex: 1;
             display: flex;
             flex-direction: column;
-            justify-content: space-around;
+            list-style: none;
         }
 
-        .ranking-item {
+        li {
+            flex: 1;                       /* reparte la altura entre las filas que lleguen */
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            background-color: #ffffff;
-            border: 1px solid var(--color-border);
-            border-radius: 0.5vh;
-            padding: 0.8vh 1.2vw;
-        }
-
-        .ranking-name {
-            color: var(--color-text-main);
-            font-size: 2.2vh;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: .3rem 0;
+            font-size: var(--fs-sm);
             font-weight: 800;
             text-transform: uppercase;
         }
+        li b { color: var(--purple); font: 900 1em monospace; }
 
-        .ranking-score {
-            background-color: #9333ea;
-            color: #ffffff;
-            font-size: 2.3vh;
-            font-weight: 900;
-            font-family: monospace;
-            padding: 0.3vh 1vw;
-            border-radius: 0.4vh;
+        /* ── Móvil / vertical: tareas arriba, luego punteros y colistas; la página hace scroll ── */
+        @media (max-width: 800px), (orientation: portrait) {
+            :root { --cols: 3fr 2fr; }
+
+            body { height: auto; min-height: 100dvh; }
+            .screen { height: auto; }
+            .body { grid-template-columns: 1fr; }
+            .rankings { grid-template-rows: auto; border-left: 0; border-top: 1px solid var(--line); }
         }
     </style>
 </head>
 <body>
-    <div x-data="armadoresApp" class="screen-container">
-        <header class="screen-header">
-            <h1 class="screen-title">ASIGNACIÓN DE PEDIDOS ARMADORES</h1>
+    <main x-data="armadoresApp" class="screen">
+        <header>
+            <h1>ASIGNACIÓN DE PEDIDOS ARMADORES</h1>
         </header>
-        
-        <div class="screen-body">
-            <div class="left-section">
-                <div class="columns-header">
-                    <span class="column-label">PICKER</span>
-                    <span class="column-label">TICKET ASIGNADO</span>
+
+        <div class="body">
+            <section class="tasks">
+                <div class="row head">
+                    <span>PICKER</span>
+                    <span>TICKET ASIGNADO</span>
                 </div>
 
-                <div class="rows-container">
-                    <template x-for="(task, index) in tasks" :key="task.ticket_number + '-' + task.picker_name">
-                        <div class="order-row" :class="{ 'order-row-alt': index % 2 === 0 }">
-                            <span class="cell-picker" x-text="task.picker_name"></span>
-                            <span class="cell-ticket" x-text="task.ticket_number"></span>
+                <div class="rows">
+                    <template x-for="task in tasks" :key="task.ticket_number + '-' + task.picker_name">
+                        <div class="row">
+                            <span class="name" x-text="task.picker_name"></span>
+                            <span class="ticket" x-text="task.ticket_number"></span>
                         </div>
                     </template>
                 </div>
-            </div>
+            </section>
 
-            <div class="right-section">
-                <div class="ranking-box">
-                    <h2 class="ranking-title">PUNTEROS</h2>
-                    <div class="ranking-list">
+            <aside class="rankings">
+                <section class="ranking">
+                    <h2>PUNTEROS</h2>
+                    <ol>
                         <template x-for="item in top" :key="item.picker_id">
-                            <div class="ranking-item">
-                                <span class="ranking-name" x-text="item.display_name"></span>
-                                <span class="ranking-score" x-text="item.final_score"></span>
-                            </div>
+                            <li>
+                                <span x-text="item.display_name"></span>
+                                <b x-text="item.final_score"></b>
+                            </li>
                         </template>
-                    </div>
-                </div>
+                    </ol>
+                </section>
 
-                <div class="ranking-box">
-                    <h2 class="ranking-title">COLISTAS</h2>
-                    <div class="ranking-list">
+                <section class="ranking">
+                    <h2>COLISTAS</h2>
+                    <ol>
                         <template x-for="item in bottom" :key="item.picker_id">
-                            <div class="ranking-item">
-                                <span class="ranking-name" x-text="item.display_name"></span>
-                                <span class="ranking-score" x-text="item.final_score"></span>
-                            </div>
+                            <li>
+                                <span x-text="item.display_name"></span>
+                                <b x-text="item.final_score"></b>
+                            </li>
                         </template>
-                    </div>
-                </div>
-            </div>
+                    </ol>
+                </section>
+            </aside>
         </div>
-    </div>
+    </main>
 
     <script>
         document.addEventListener('alpine:init', () => {
