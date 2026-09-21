@@ -148,7 +148,7 @@ class TicketController extends Controller
 
             DB::commit();
 
-            Log::info('Ticket creado con éxito y total_day actualizado', [
+            Log::info('Ticket creado con éxito', [
                 'ticket_number' => $ticket->ticket_number,
                 'seller'        => $ticket->seller,
                 'total_amount'  => $ticket->total_amount,
@@ -278,7 +278,6 @@ class TicketController extends Controller
                 'bottom' => []
             ], 200);
         }
-
         $pickersData = DB::table('picker_total_day as ptd')
             ->join('pickers as p', 'p.id', '=', 'ptd.picker_id')
             ->where('ptd.date', $date)
@@ -330,7 +329,6 @@ class TicketController extends Controller
     public function pickerTasks(Request $request)
     {
         $limit = 12;
-
         $activeTasks = DB::table('picking_assignments as pa')
             ->join('pickers as p', 'p.id', '=', 'pa.picker_id')
             ->join('picking_tasks as pt', 'pt.id', '=', 'pa.picking_task_id')
@@ -354,7 +352,9 @@ class TicketController extends Controller
 
 
     /**
-     * Calculates and returns the calculated score metrics for pickers on a given date.
+     * Calculates and returns the score metrics 
+     * for pickers on a given date.
+     * (for revision)
      * 
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\JsonResponse
@@ -392,11 +392,8 @@ class TicketController extends Controller
         $rankings = $pickersData->map(function ($picker) use ($globalTotals, $weightTickets, $weightItems, $weightAmount) {
 
             $ticketShare = $globalTotals->total_tickets > 0 ? ($picker->total_tasks / $globalTotals->total_tickets) * 100 : 0;
-
             $itemShare = $globalTotals->total_items > 0 ? ($picker->total_items / $globalTotals->total_items) * 100 : 0;
-
             $amountShare = $globalTotals->total_amount > 0 ? ($picker->total_amount / $globalTotals->total_amount) * 100 : 0;
-
             $finalScore = ($ticketShare * $weightTickets) + ($itemShare * $weightItems) + ($amountShare * $weightAmount);
 
             return [

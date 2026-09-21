@@ -16,7 +16,6 @@
             --pad: max(16px, 2vw);   /* margen lateral */
             --cols: 13fr 7fr;        /* columnas Picker | Ticket */
 
-            /* Tamaños: escalan con la altura de la pantalla (TV), pero se limitan por ancho y por un mínimo (móvil) */
             --fs-sm: max(13px, min(2.3vh, 4vw));
             --fs-md: max(16px, min(3.5vh, 6vw));
             --fs-lg: max(20px, min(5vh, 7vw));
@@ -32,7 +31,6 @@
             font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
         }
 
-        /* ── Tarjeta principal: cabecera + cuerpo ── */
         .screen {
             display: grid;
             grid-template-rows: auto minmax(0, 1fr);
@@ -47,21 +45,33 @@
         }
 
         .screen > header {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;   /* vacío | título | fecha */
+            align-items: center;
             padding: 1.2vh var(--pad);
             background: var(--tint);
             border-bottom: 1px solid var(--line);
-            text-align: center;
         }
 
-        h1 {
+        .title {
+            grid-column: 2;
             color: var(--purple);
             font-size: var(--fs-md);
             font-weight: 900;
             letter-spacing: .08em;
+            text-align: center;
             text-wrap: balance;
         }
 
-        /* ── Cuerpo: tareas | rankings ── */
+        .date {
+            grid-column: 3;
+            justify-self: end;
+            color: var(--purple-dark);
+            font-size: var(--fs-md);
+            font-weight: 800;
+            font-variant-numeric: tabular-nums;
+        }
+
         .body {
             display: grid;
             grid-template-columns: 19fr 11fr;
@@ -156,18 +166,19 @@
             justify-content: space-between;
             gap: 1rem;
             padding: .3rem 0;
-            font-size: var(--fs-sm);
+            font-size: var(--fs-md);
             font-weight: 800;
             text-transform: uppercase;
         }
-        li b { color: var(--purple); font: 900 1em monospace; }
+        li b { color: var(--purple); font: 900 1.6em monospace; }
+        li + li { border-top: 1px solid rgba(192, 132, 252, .35); }
 
-        /* ── Móvil / vertical: tareas arriba, luego punteros y colistas; la página hace scroll ── */
         @media (max-width: 800px), (orientation: portrait) {
             :root { --cols: 3fr 2fr; }
-
             body { height: auto; min-height: 100dvh; }
             .screen { height: auto; }
+            .screen > header { grid-template-columns: 1fr; gap: .3rem; }
+            .title, .date { grid-column: 1; justify-self: center; }
             .body { grid-template-columns: 1fr; }
             .rankings { grid-template-rows: auto; border-left: 0; border-top: 1px solid var(--line); }
         }
@@ -176,16 +187,15 @@
 <body>
     <main x-data="armadoresApp" class="screen">
         <header>
-            <h1>ASIGNACIÓN DE PEDIDOS ARMADORES</h1>
+            <h1 class="title">ASIGNACIÓN DE PEDIDOS</h1>
+            <time class="date" datetime="{{ now()->toDateString() }}">{{ now()->format('d/m/Y') }}</time>
         </header>
-
         <div class="body">
             <section class="tasks">
                 <div class="row head">
                     <span>PICKER</span>
                     <span>TICKET ASIGNADO</span>
                 </div>
-
                 <div class="rows">
                     <template x-for="task in tasks" :key="task.ticket_number + '-' + task.picker_name">
                         <div class="row">
@@ -240,12 +250,12 @@
                         const json = await res.json();
                         this.tasks = json.tasks ?? [];
                     } catch (e) {
-                        console.error('Error fetching active tasks:', e);
+                        console.error('Error tareas activas:', e);
                     }
                 },
                 async fetchScores() {
                     try {
-                        const res = await fetch('/api/pickers/scores', {
+                        const res = await fetch('/api/pickers/scores2', {
                             headers: { 'Accept': 'application/json' },
                         });
                         if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
@@ -253,17 +263,16 @@
                         this.top = json.top ?? [];
                         this.bottom = json.bottom ?? [];
                     } catch (e) {
-                        console.error('Error fetching scores:', e);
+                        console.error('Error puntajes:', e);
                     }
                 },
                 init() {
                     this.fetchActiveTasks();
                     this.fetchScores();
-
                     setInterval(() => {
                         this.fetchActiveTasks();
                         this.tickCount++;
-                        if (this.tickCount >= 20) {
+                        if (this.tickCount >= 80) {
                             this.tickCount = 0;
                             this.fetchScores();
                         }
